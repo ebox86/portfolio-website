@@ -23,6 +23,9 @@ jobs:
 
       - name: Build and Push Docker image
         env:
+          PAT: ${{ secrets.PAT }}
           GHCR_REPOSITORY: ${{ github.repository }}
         run: |
-          docker buildx build -t ghcr.io/$GHCR_REPOSITORY/my-image:latest . --push
+          echo $PAT | docker login ghcr.io -u ebox86 --password-stdin
+          docker build -t ghcr.io/$GHCR_REPOSITORY/portfolio-website:latest .
+          docker push ghcr.io/ebox86/portfolio-website:latest
