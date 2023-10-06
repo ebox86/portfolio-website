@@ -35,7 +35,7 @@ function Header() {
           </Link>
           <ul className="flex space-x-4">
             <li className="text-lg relative group p-2">
-              <Link href="/about">Blog</Link>
+              <Link href="/blog">Blog</Link>
             </li>
             <li className="text-lg relative group p-2">
               <Link href="/projects">Projects</Link>
