@@ -25,6 +25,6 @@ jobs:
         env:
           GHCR_REPOSITORY: ${{ github.repository }}
         run: |
-          docker build -t ghcr.io/ebox86/$GHCR_REPOSITORY:latest .
-          docker tag ghcr.io/ebox86/$GHCR_REPOSITORY:latest ghcr.io/ebox86/$GHCR_REPOSITORY:latest
-          docker push ghcr.io/ebox86/$GHCR_REPOSITORY:latest
+          docker build -t ghcr.io/$GHCR_REPOSITORY:latest .
+          docker tag ghcr.io/$GHCR_REPOSITORY:latest ghcr.io/ebox86/$GHCR_REPOSITORY:latest
+          docker push ghcr.io/$GHCR_REPOSITORY:latest .
