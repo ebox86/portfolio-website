@@ -2,6 +2,9 @@ export default {
   name: 'post',
   title: 'Post',
   type: 'document',
+  initialValue: () => ({
+    publishedAt: new Date().toISOString()
+  }),
   fields: [
     {
       name: 'title',
@@ -36,6 +39,7 @@ export default {
       title: 'Categories',
       type: 'array',
       of: [{type: 'reference', to: {type: 'category'}}],
+      validation: Rule => Rule.max(3)
     },
     {
       name: 'publishedAt',

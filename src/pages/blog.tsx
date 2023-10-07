@@ -1,11 +1,10 @@
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { GetStaticProps } from 'next';
-import client from '../../sanityClient'; // Import the Sanity client instance
-import imageUrlBuilder from '@sanity/image-url'; // Import imageUrlBuilder
+import client from '../../sanityClient';
+import imageUrlBuilder from '@sanity/image-url';
 import {toPlainText} from '@portabletext/react'
 
-// Initialize imageUrlBuilder with your Sanity project settings
 const builder = imageUrlBuilder(client);
 
 interface BlogPost {
@@ -15,6 +14,7 @@ interface BlogPost {
   publishedAt: string;
   mainImage: any;
   body: any;
+  categories: any;
 }
 
 interface BlogPageProps {
@@ -26,7 +26,6 @@ const BlogPage: React.FC<BlogPageProps> = ({ posts }) => {
     console.log('List of Blog Posts:', posts);
   }, [posts]);
 
-  // Function to get the image URL
   const getImageUrl = (imageField: any) => {
     return builder.image(imageField).url() || '';
   };
@@ -36,7 +35,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ posts }) => {
       <h1 className="text-2xl font-bold text-gray-800">Posts</h1>
       <ul className="mt-4 space-y-4">
         {posts.length > 0 &&
-          posts.map(({ _id, title = '', slug = '', publishedAt = '', mainImage = '', body }) =>
+          posts.map(({ _id, title = '', slug = '', publishedAt = '', mainImage = '', body, categories }) =>
             slug && (
               <Link key={_id} href={`/blog/${encodeURIComponent(slug.current)}`}>
                 <li className="bg-white my-4 shadow-md rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 cursor-pointer">
@@ -48,12 +47,19 @@ const BlogPage: React.FC<BlogPageProps> = ({ posts }) => {
                     />
                     <div className="p-4 w-1/2">
                       <h2 className="text-xl font-semibold cursor-pointer">{title}</h2>
-                      <p className="text-gray-600 text-sm mt-1">
+                      <p className="text-gray-600 text-sm my-1">
                         Published on {new Date(publishedAt).toDateString()}
                       </p>
-                      <p className="text-gray-800 mt-2">
-                        {toPlainText(body).length >= 100 ? toPlainText(body).slice(0, 100) + '...' : toPlainText(body) }
-                      </p>
+                      {categories &&
+                        categories.map(({_id = '', title = ''}) => (
+                          <span key={_id} className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-blue-900 dark:text-blue-300">{title}</span>
+                        ))
+                      }
+                      {body && (
+                        <p className="text-gray-800 mt-2">
+                          {toPlainText(body).length >= 100 ? toPlainText(body).slice(0, 100) + '...' : toPlainText(body) }
+                        </p>
+                      )}
                     </div>
                   </div>
                 </li>
@@ -73,6 +79,7 @@ export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
     body,
     publishedAt,
     mainImage,
+    categories[] -> {title, _id}
   }`;
 
   const posts = await client.fetch<BlogPost[]>(query);

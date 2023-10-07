@@ -1,5 +1,3 @@
-// src/components/Header.tsx
-
 import React from 'react';
 import Link from 'next/link';
 // import RandomShape from './RandomShape';
@@ -25,7 +23,7 @@ function Header() {
       <nav className="flex justify-between items-center flex-col md:flex-row px-4">
           <Link href="/">
             <div className="text-5xl md:text-6xl font-bold text-center md:text-left cursor-pointer">
-              <div className="text-lg md:text-3xl relative">
+              <div className="text-3xl relative">
                 <span className="gradient-text" data-content="@ebox86">@ebox86</span>
               </div>
               <div className="text-xs md:text-sm">

@@ -7,7 +7,7 @@ const ContactPage = () => {
     <div className="flex flex-col md:flex-row">
       {/* Contact Form Column */}
       <div className="md:flex-1 p-4">
-        <h1 className="text-3xl font-semibold mb-4">Lets Connect</h1>
+        <h1 className="text-2xl font-semibold mb-4">Lets Connect</h1>
         <form>
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -60,7 +60,6 @@ const ContactPage = () => {
       {/* Social Links Column */}
       <div className="md:w-24 p-4 bg-gray-200 rounded-lg flex flex-col justify-center items-center md:ml-4 md:mt-0">
         <div className="social-media-section">
-          {/* Use flex classes to control layout */}
           <div className="social-icons flex flex-row md:flex-col">
             <a href="https://www.linkedin.com/in/evan-kohout/" className="text-4xl text-blue-600 hover:text-blue-800 p-4">
               <FaLinkedin size={40} />
