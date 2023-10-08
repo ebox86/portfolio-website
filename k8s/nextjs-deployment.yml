@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: "nextjs-app"
+  name: "nextjs-app"
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: "nextjs-app"
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: "nextjs-app"
+    spec:
+      containers:
+        - image: ghcr.io/ebox86/portfolio-website:latest
+          imagePullPolicy: Always
+          name: "nextjs-app"
+          env:
+            - name: "REACT_APP_ENVIRONMENT"
+              value: "PROD"
+            - name: "CAT_API_KEY"
+              valueFrom:
+                secretKeyRef:
+                  name: cat-api-secret
+                  key: api-key
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      imagePullSecrets:
+        - name: ghcr-pat
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always

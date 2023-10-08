@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { GetStaticProps } from 'next';
 import client from '../../sanityClient';
-import RandomCatImage from '../components/RandomCatImage'; // Import the RandomCatImage component
+import RandomCatImage from '../components/RandomCatImage';
 
 interface BlogPost {
   _id: string;
@@ -16,6 +16,15 @@ interface HomePageProps {
 }
 
 const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
+  const [formattedDates, setFormattedDates] = useState<string[]>([]);
+
+  useEffect(() => {
+    const formattedDatesArray = recentPosts.map(({ publishedAt }) => {
+      return new Date(publishedAt).toDateString();
+    });
+    setFormattedDates(formattedDatesArray);
+  }, [recentPosts]);
+
   return (
     <div className="container mx-auto">
       <div className="w-full md:w-4/5 md:float-left">
@@ -27,11 +36,11 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
         <div className="p-4 hidden md:block">
           <h2 className="text-md font-semibold text-gray-800 mb-4">Recent Posts</h2>
           <ul className="space-y-4">
-            {recentPosts.map(({ _id, title = '', slug = '', publishedAt = '' }, index) => (
+            {recentPosts.map(({ _id, title = '', slug = '' }, index) => (
               <li key={_id}>
                 <Link href={`/blog/${encodeURIComponent(slug.current)}`}>
                   <p className="text-sm">{title}</p>
-                  <p className="text-xs text-gray-400">{new Date(publishedAt).toDateString()}</p>
+                  <p className="text-xs text-gray-400">{formattedDates[index]}</p>
                 </Link>
                 {index !== recentPosts.length - 1 && <hr className="my-4" />}
               </li>
