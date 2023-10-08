@@ -13,6 +13,10 @@ RUN npm install
 # Bundle app source
 COPY . .
 
+# Define vars
+ARG NEXT_PUBLIC_CAT_API_KEY
+ENV NEXT_PUBLIC_CAT_API_KEY=$NEXT_PUBLIC_CAT_API_KEY
+
 # Build your Next.js application
 RUN npm run build
 
