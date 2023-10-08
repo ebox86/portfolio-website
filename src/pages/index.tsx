@@ -42,16 +42,10 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
       setVotingButtonsActive(false); // Disable buttons during the vote
   
       const response = await axios.post(
-        'https://api.thecatapi.com/v1/votes',
+        `https://api.thecatapi.com/v1/votes?api_key=${process.env.NEXT_PUBLIC_CAT_API_KEY}`,
         {
           image_id: imageId,
           value: value,
-        },
-        {
-          headers: {
-            'x-api-key': process.env.NEXT_PUBLIC_CAT_API_KEY,
-            'Access-Control-Allow-Origin': '*',
-          },
         }
       );
   

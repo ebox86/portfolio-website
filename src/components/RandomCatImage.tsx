@@ -13,12 +13,7 @@ const RandomCatImage: React.FC<RandomCatImageProps> = ({ onImageLoad }) => {
     if (shouldFetchImage) {
       const fetchRandomCatImage = async () => {
         try {
-          const response = await axios.get('https://api.thecatapi.com/v1/images/search', {
-            headers: {
-              'x-api-key': process.env.NEXT_PUBLIC_CAT_API_KEY,
-              'Access-Control-Allow-Origin': '*',
-            },
-          });
+          const response = await axios.get(`https://api.thecatapi.com/v1/images/search?api_key=${process.env.NEXT_PUBLIC_CAT_API_KEY}`);
           if (response.data && response.data.length > 0) {
             const imageUrl = response.data[0].url;
             setCatImage(imageUrl);
