@@ -24,11 +24,11 @@ spec:
           env:
             - name: "REACT_APP_ENVIRONMENT"
               value: "PROD"
-            - name: "NEXT_PUBLIC_CAT_API_KEY"
-              valueFrom:
-                secretKeyRef:
-                  name: cat-api-secret
-                  key: api-key
+            # - name: "NEXT_PUBLIC_CAT_API_KEY"
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: cat-api-secret
+            #       key: api-key
           ports:
             - containerPort: 3000
               protocol: TCP

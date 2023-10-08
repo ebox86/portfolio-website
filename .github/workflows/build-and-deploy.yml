@@ -25,6 +25,7 @@ jobs:
         env:
           GHCR_REPOSITORY: ${{ github.repository }}
         run: |
-          docker build -t ghcr.io/$GHCR_REPOSITORY:latest .
+          docker build -t ghcr.io/$GHCR_REPOSITORY:latest \
+          --build-arg=NEXT_PUBLIC_CAT_API_KEY=${{ secrets.CAT_API_KEY }} .
           docker tag ghcr.io/$GHCR_REPOSITORY:latest ghcr.io/ebox86/$GHCR_REPOSITORY:latest
           docker push ghcr.io/$GHCR_REPOSITORY:latest
