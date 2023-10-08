@@ -50,6 +50,7 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
         {
           headers: {
             'x-api-key': process.env.NEXT_PUBLIC_CAT_API_KEY,
+            'Access-Control-Allow-Origin': '*',
           },
         }
       );
