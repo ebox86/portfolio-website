@@ -1,27 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const RandomCatImage: React.FC = () => {
+interface RandomCatImageProps {
+  onImageLoad: (image: string) => void;
+}
+
+const RandomCatImage: React.FC<RandomCatImageProps> = ({ onImageLoad }) => {
   const [catImage, setCatImage] = useState<string | null>(null);
+  const [shouldFetchImage, setShouldFetchImage] = useState(true);
 
   useEffect(() => {
-    const fetchRandomCatImage = async () => {
-      try {
-        const response = await axios.get('https://api.thecatapi.com/v1/images/search', {
-          headers: {
-            'x-api-key': process.env.CAT_API_KEY,
-          },
-        });
-        if (response.data && response.data.length > 0) {
-          setCatImage(response.data[0].url);
+    if (shouldFetchImage) {
+      const fetchRandomCatImage = async () => {
+        try {
+          const response = await axios.get('https://api.thecatapi.com/v1/images/search', {
+            headers: {
+              'x-api-key': process.env.NEXT_PUBLIC_CAT_API_KEY,
+            },
+          });
+          if (response.data && response.data.length > 0) {
+            const imageUrl = response.data[0].url;
+            setCatImage(imageUrl);
+            onImageLoad(imageUrl); // Call the onImageLoad callback with the image URL
+          }
+        } catch (error) {
+          console.error('Error fetching cat image:', error);
         }
-      } catch (error) {
-        console.error('Error fetching cat image:', error);
-      }
-    };
+      };
 
-    fetchRandomCatImage();
-  }, []);
+      fetchRandomCatImage();
+      setShouldFetchImage(false); // Prevent further image fetching until needed again
+    }
+  }, [onImageLoad, shouldFetchImage]);
 
   return (
     <div className="mb-4">
