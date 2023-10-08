@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { GetStaticProps } from 'next';
 import client from '../../sanityClient';
+import RandomCatImage from '../components/RandomCatImage'; // Import the RandomCatImage component
 
 interface BlogPost {
   _id: string;
@@ -16,13 +17,14 @@ interface HomePageProps {
 
 const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
   return (
-    <div className="container mx-auto p-4">
-      <div className="w-4/5 float-left">
+    <div className="container mx-auto">
+      <div className="w-full md:w-4/5 md:float-left">
+        <RandomCatImage />
         <h1 className="text-2xl font-bold text-gray-800">Welcome</h1>
         <p className="text-gray-700">More to come! Stay tuned!</p>
       </div>
-      <div className="w-1/5  float-left hidden md:block">
-        <div className="p-4">
+      <div className="w-full md:w-1/5 md:float-left">
+        <div className="p-4 hidden md:block">
           <h2 className="text-md font-semibold text-gray-800 mb-4">Recent Posts</h2>
           <ul className="space-y-4">
             {recentPosts.map(({ _id, title = '', slug = '', publishedAt = '' }, index) => (
