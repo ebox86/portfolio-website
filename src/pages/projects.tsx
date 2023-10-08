@@ -1,12 +1,11 @@
-// pages/projects.tsx
-
 import React from 'react';
 
 const ProjectsPage: React.FC = () => {
   return (
-    <div>
-      <h1>Projects Page</h1>
-      {/* Add your project content here */}
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold text-gray-800">Projects</h1>
+      <p>coming soon</p>
+      {/* Add project content here */}
     </div>
   );
 };

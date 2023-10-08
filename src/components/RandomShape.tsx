@@ -1,11 +1,10 @@
-// src/components/RandomShape.tsx
 "use client";
 import React, { useState } from 'react';
 
 interface RandomShapeProps {
   clipPath?: string;
   hoverable?: boolean;
-  children?: React.ReactNode; // Allow passing children (text) within the shape
+  children?: React.ReactNode;
 }
 
 const RandomShape: React.FC<RandomShapeProps> = ({ clipPath, hoverable, children }) => {
@@ -25,11 +24,6 @@ const RandomShape: React.FC<RandomShapeProps> = ({ clipPath, hoverable, children
   
     return `polygon(${points.join(', ')})`;
   };
-  
-  
-  
-  
-  
 
   const handleMouseEnter = () => {
     if (hoverable) {
