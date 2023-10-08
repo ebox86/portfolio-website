@@ -63,7 +63,7 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
       console.error('Error voting:', error);
     }
   };  
-
+  console.log(process.env.NEXT_PUBLIC_CAT_API_KEY)
   return (
     <div className="container mx-auto">
       <div className="w-full md:w-4/5 md:float-left relative">
