@@ -24,7 +24,7 @@ spec:
           env:
             - name: "REACT_APP_ENVIRONMENT"
               value: "PROD"
-            - name: "CAT_API_KEY"
+            - name: "NEXT_PUBLIC_CAT_API_KEY"
               valueFrom:
                 secretKeyRef:
                   name: cat-api-secret
