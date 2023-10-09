@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Image from 'next/image'
 
 interface RandomCatImageProps {
   onImageLoad: (image: string) => void;
@@ -8,6 +9,8 @@ interface RandomCatImageProps {
 const RandomCatImage: React.FC<RandomCatImageProps> = ({ onImageLoad }) => {
   const [catImage, setCatImage] = useState<string | null>(null);
   const [shouldFetchImage, setShouldFetchImage] = useState(true);
+  const [imageWidth, setImageWidth] = useState<number | `${number}` | undefined>(0); // Default to 0
+  const [imageHeight, setImageHeight] = useState<number | `${number}` | undefined>(0); // Default to 0
 
   useEffect(() => {
     if (shouldFetchImage) {
@@ -18,6 +21,10 @@ const RandomCatImage: React.FC<RandomCatImageProps> = ({ onImageLoad }) => {
             const imageUrl = response.data[0].url;
             setCatImage(imageUrl);
             onImageLoad(imageUrl); // Call the onImageLoad callback with the image URL
+
+            // Set image dimensions
+            setImageWidth(response.data[0].width);
+            setImageHeight(response.data[0].height);
           }
         } catch (error) {
           console.error('Error fetching cat image:', error);
@@ -28,15 +35,17 @@ const RandomCatImage: React.FC<RandomCatImageProps> = ({ onImageLoad }) => {
       setShouldFetchImage(false); // Prevent further image fetching until needed again
     }
   }, [onImageLoad, shouldFetchImage]);
-
+console.log({imageWidth})
   return (
     <div className="mb-4">
       {catImage && (
-        <img
-          src={catImage}
-          alt="Random Cat"
-          className="w-full rounded-lg shadow-md"
-          style={{ maxWidth: '100%' }}
+        <Image
+            src={catImage}
+            alt="Random Cat"
+            width={imageWidth}
+            height={imageHeight}
+            className="w-full rounded-lg shadow-md"
+            style={{ maxWidth: '100%' }}
         />
       )}
     </div>
