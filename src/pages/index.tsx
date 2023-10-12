@@ -90,7 +90,7 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
           </div>
           <br />
           <p className="text-gray-700">
-            Here's a cat 👇
+            Here&apos;s a cat 👇
           </p>
         </div>
         <div className="w-full md:w-2/6 md:float-left p-4 hidden md:block">
