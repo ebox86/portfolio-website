@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { GetStaticProps } from 'next';
 import client from '../../sanityClient';
-import RandomCatImage from '../components/RandomCatImage';
+import RandomCatImage from '@/components/RandomCatImage';
+import Avatar from '@/components/Avatar';
 import axios from 'axios';
 
 interface BlogPost {
@@ -20,7 +21,7 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
   const [formattedDates, setFormattedDates] = useState<string[]>([]);
   const [catImage, setCatImage] = useState<string | null>(null);
   const [votingButtonsActive, setVotingButtonsActive] = useState(true);
-  const [catImageKey, setCatImageKey] = useState<string | null>(null); // State for the key
+  const [catImageKey, setCatImageKey] = useState<string | null>(null);
 
   useEffect(() => {
     const formattedDatesArray = recentPosts.map(({ publishedAt }) => {
@@ -64,7 +65,38 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
     }
   };  
   return (
-    <div className="container mx-auto">
+      <div className="container mx-auto max-w-screen-md">
+        <div>
+          <div className="pt-6 pb-2 w-full md:w-4/6 md:float-left relative text-center md:text-left">
+          <h1 className="text-4xl font-bold text-gray-800">👋 Hey, I'm Evan</h1>
+          <p className="text-gray-700 py-2">
+            Engineer. Traveler. Thinker. Creator.
+          </p>
+          <div className="flex flex-col md:flex-row md:items-center">
+            <Link href="/me">
+              <div className="m-2 md:text-left text-center">
+                <button className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                  ☕ Get to know me
+                </button>
+              </div>
+            </Link>
+            <Link href="/contact">
+              <div className="m-2 md:text-left text-center">
+                <button className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                  📞 Get in touch
+                </button>
+              </div>
+            </Link>
+          </div>
+          <br />
+          <p className="text-gray-700">
+            Here's a cat 👇
+          </p>
+        </div>
+        <div className="w-full md:w-2/6 md:float-left p-4 hidden md:block">
+          <Avatar src={`/images/headshot.png`} />
+        </div>
+      </div>
       <div className="w-full md:w-4/5 md:float-left relative">
         <RandomCatImage onImageLoad={(image) => setCatImage(image)} key={catImageKey} />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -73,7 +105,7 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
             className={`bg-white rounded-full p-2 shadow-md hover:shadow-lg transform hover:scale-110 transition duration-300 ${
               !votingButtonsActive && 'bg-gray-400 cursor-not-allowed'
             }`}
-            style={{ bottom: '85px', right: '50px', zIndex: 1, position: 'absolute' }}
+            style={{ bottom: '25px', right: '50px', zIndex: 1, position: 'absolute' }}
             title="Thumbs Up"
             disabled={!votingButtonsActive}
           >
@@ -84,15 +116,13 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
             className={`bg-white rounded-full p-2 shadow-md hover:shadow-lg transform hover:scale-110 transition duration-300 ${
               !votingButtonsActive && 'bg-gray-400 cursor-not-allowed'
             }`}
-            style={{ bottom: '85px', right: '10px', zIndex: 1, position: 'absolute' }}
+            style={{ bottom: '25px', right: '10px', zIndex: 1, position: 'absolute' }}
             title="Thumbs Down"
             disabled={!votingButtonsActive}
           >
             👎
           </button>
         </div>
-        <h1 className="text-2xl font-bold text-gray-800">Welcome</h1>
-        <p className="text-gray-700">More to come! Stay tuned!</p>
       </div>
       <div className="w-full md:w-1/5 md:float-left">
         <div className="p-4 hidden md:block">
@@ -116,7 +146,7 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
 };
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  const query = `*[_type == "post"] | order(publishedAt desc) [0..4] {
+  const query = `*[_type == "post"] | order(publishedAt desc) [0..2] {
     _id,
     title,
     slug,

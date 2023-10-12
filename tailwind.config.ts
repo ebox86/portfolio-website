@@ -8,6 +8,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-fira)']
+      },
       colors: {
         teal: {
           500: '#008080', // Your original teal color

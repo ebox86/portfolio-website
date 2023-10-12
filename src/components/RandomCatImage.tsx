@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Image from 'next/image'
+import Image from "next/legacy/image"
 
 interface RandomCatImageProps {
   onImageLoad: (image: string) => void;
@@ -35,7 +35,6 @@ const RandomCatImage: React.FC<RandomCatImageProps> = ({ onImageLoad }) => {
       setShouldFetchImage(false); // Prevent further image fetching until needed again
     }
   }, [onImageLoad, shouldFetchImage]);
-console.log({imageWidth})
   return (
     <div className="mb-4">
       {catImage && (
@@ -44,8 +43,10 @@ console.log({imageWidth})
             alt="Random Cat"
             width={imageWidth}
             height={imageHeight}
-            className="w-full rounded-lg shadow-md"
-            style={{ maxWidth: '100%' }}
+            priority={true}
+            layout='responsive'
+            objectFit='fill'
+            className="rounded-lg shadow-md"
         />
       )}
     </div>
