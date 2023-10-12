@@ -68,7 +68,7 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
       <div className="container mx-auto max-w-screen-md">
         <div>
           <div className="pt-6 pb-2 w-full md:w-4/6 md:float-left relative text-center md:text-left">
-          <h1 className="text-4xl font-bold text-gray-800">👋 Hey, I'm Evan</h1>
+          <h1 className="text-4xl font-bold text-gray-800">👋 Hey, I&apos;m Evan</h1>
           <p className="text-gray-700 py-2">
             Engineer. Traveler. Thinker. Creator.
           </p>
