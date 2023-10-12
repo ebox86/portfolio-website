@@ -26,12 +26,15 @@ function Header() {
               <div className="text-3xl relative">
                 <span className="gradient-text" data-content="@ebox86">@ebox86</span>
               </div>
-              <div className="text-xs md:text-sm">
+              {/* <div className="text-xs md:text-sm">
                 the personal website of Evan Kohout
-              </div>
+              </div> */}
             </div>
           </Link>
           <ul className="flex space-x-4">
+            <li className="text-lg relative group p-2">
+              <Link href="/me">About</Link>
+            </li>
             <li className="text-lg relative group p-2">
               <Link href="/blog">Blog</Link>
             </li>
