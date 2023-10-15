@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { GetStaticProps } from 'next';
 import client from '../../sanityClient';
@@ -17,11 +18,19 @@ interface HomePageProps {
   recentPosts: BlogPost[];
 }
 
+type CatImageData = {
+  url: string;
+  width: number;
+  height: number;
+  id: string;
+};
+
 const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
+  const router = useRouter();
   const [formattedDates, setFormattedDates] = useState<string[]>([]);
-  const [catImage, setCatImage] = useState<string | null>(null);
+  const [currentImage, setCurrentImage] = useState<CatImageData | null>(null);
+  const [nextImage, setNextImage] = useState<CatImageData | null>(null);
   const [votingButtonsActive, setVotingButtonsActive] = useState(true);
-  const [catImageKey, setCatImageKey] = useState<string | null>(null);
 
   useEffect(() => {
     const formattedDatesArray = recentPosts.map(({ publishedAt }) => {
@@ -30,40 +39,77 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
     setFormattedDates(formattedDatesArray);
   }, [recentPosts]);
 
+  const fetchCatImages = async () => {
+    try {
+      // Fetch only one image if there's already a currentImage, else fetch 2 images
+      const limit = currentImage ? 1 : 2;
+      const response = await axios.get(`https://api.thecatapi.com/v1/images/search?limit=${limit}&api_key=${process.env.NEXT_PUBLIC_CAT_API_KEY}`);
+      
+      if (limit === 1) {
+        // We're fetching only one new image for preloading
+        setNextImage({
+          url: response.data[0].url,
+          width: response.data[0].width,
+          height: response.data[0].height,
+          id: response.data[0].id
+        });
+      } else {
+        // Initial load, set the currentImage and nextImage
+        setCurrentImage({
+          url: response.data[0].url,
+          width: response.data[0].width,
+          height: response.data[0].height,
+          id: response.data[0].id
+        });
+        setNextImage({
+          url: response.data[1].url,
+          width: response.data[1].width,
+          height: response.data[1].height,
+          id: response.data[1].id
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching cat images:", error);
+    }
+  };
+  
+  
+
+  useEffect(() => {
+    fetchCatImages();
+  }, []);
+
+  
   const handleVote = async (value: number) => {
     try {
-      if (!catImage) {
+      if (!currentImage) {
         console.error('No cat image loaded.');
         return;
       }
-  
-      // Extract the image ID from the catImage URL
-      const imageId = catImage.split('/').pop()?.split('.')[0]; // Extract the last segment of the URL
-  
+    
       setVotingButtonsActive(false); // Disable buttons during the vote
   
       const response = await axios.post(
         `https://api.thecatapi.com/v1/votes?api_key=${process.env.NEXT_PUBLIC_CAT_API_KEY}`,
         {
-          image_id: imageId,
+          image_id: currentImage.id,
           value: value,
         }
       );
   
-      console.log(response.data);
+      // Show the preloaded image immediately
+      setCurrentImage(nextImage);
+      setNextImage(null);
   
-      // Handle success or update the UI as needed
+      // Fetch two new images in the background
+      fetchCatImages();
   
-      // Load a new cat image by updating the key with a random string
-      const newCatImageKey = Math.random().toString(36).substring(7);
-      setCatImageKey(newCatImageKey);
-      
-      // Reactivate the buttons
       setVotingButtonsActive(true);
     } catch (error) {
       console.error('Error voting:', error);
     }
-  };  
+  };
+  
   return (
       <div className="container mx-auto max-w-screen-md">
         <div>
@@ -73,20 +119,18 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
             Engineer. Traveler. Thinker. Creator.
           </p>
           <div className="flex flex-col md:flex-row md:items-center">
-            <Link href="/me">
-              <div className="m-2 md:text-left text-center">
-                <button className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                  ☕ Get to know me
-                </button>
-              </div>
-            </Link>
-            <Link href="/contact">
-              <div className="m-2 md:text-left text-center">
-                <button className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2">
-                  📞 Get in touch
-                </button>
-              </div>
-            </Link>
+            <button 
+              onClick={() => router.push('/me')}
+              className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 m-2 md:text-left text-center inline-block"
+            >
+              ☕ Get to know me
+            </button>
+            <button 
+              onClick={() => router.push('/contact')}
+              className="m-2 md:text-left text-center py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            >
+              📞 Get in touch
+            </button>
           </div>
           <br />
           <p className="text-gray-700">
@@ -98,7 +142,12 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
         </div>
       </div>
       <div className="w-full md:w-4/5 md:float-left relative">
-        <RandomCatImage onImageLoad={(image) => setCatImage(image)} key={catImageKey} />
+      <RandomCatImage 
+        currentImage={currentImage?.url}
+        imageWidth={currentImage?.width}
+        imageHeight={currentImage?.height}
+        nextImage={nextImage?.url}
+      />
         <div className="absolute inset-0 flex items-center justify-center">
           <button
             onClick={() => handleVote(1)}
