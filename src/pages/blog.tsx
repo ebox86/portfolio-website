@@ -1,5 +1,7 @@
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import Image from 'next/image';
+import useSWR from 'swr';
 import { GetStaticProps } from 'next';
 import client from '../../sanityClient';
 import imageUrlBuilder from '@sanity/image-url';
@@ -18,42 +20,55 @@ interface BlogPost {
 }
 
 interface BlogPageProps {
-  posts: BlogPost[];
+  initialData: BlogPost[];
 }
 
-const BlogPage: React.FC<BlogPageProps> = ({ posts }) => {
-  useEffect(() => {
-    console.log('List of Blog Posts:', posts);
-  }, [posts]);
+const fetchPosts = async () => {
+  const query = `*[_type == "post"] {
+    _id,
+    title,
+    slug,
+    body,
+    publishedAt,
+    mainImage,
+    categories[] -> {title, _id}
+  }`;
 
-  const getImageUrl = (imageField: any) => {
-    return builder.image(imageField).url() || '';
-  };
+  return await client.fetch<BlogPost[]>(query);
+};
+
+function urlFor(source: any) {
+  return builder.image(source);
+}
+
+const BlogPage: React.FC<BlogPageProps> = ({ initialData }) => {
+  const { data: posts } = useSWR('fetchPostsKey', fetchPosts, {
+    initialData,
+    revalidateOnFocus: false,
+  });
 
   const [formattedDates, setFormattedDates] = useState<string[]>([]);
-
-  useEffect(() => {
-    const formattedDatesArray = posts.map(({ publishedAt }) => {
-      return new Date(publishedAt).toDateString();
-    });
-    setFormattedDates(formattedDatesArray);
-  }, [posts]);
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold text-gray-800">Posts</h1>
       <ul className="mt-4 space-y-4">
-        {posts.length > 0 &&
-          posts.map(({ _id, title = '', slug = '', mainImage = '', categories, body }, index) =>
+        {initialData.length > 0 &&
+          initialData.map(({ _id, title = '', slug = '', mainImage = '', categories, body }, index) =>
             slug && (
               <Link key={_id} href={`/blog/${encodeURIComponent(slug.current)}`}>
                 <li className="bg-white my-4 shadow-md rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 cursor-pointer">
                   <div className="flex">
-                    <img
-                      src={getImageUrl(mainImage)}
-                      alt={title}
-                      className="object-cover h-48 w-1/2 rounded-l-lg"
-                    />
+                    <div className="relative w-1/2 h-48">
+                      <Image
+                        src={urlFor(mainImage).width(400).quality(80).url() || ''}
+                        alt={title}
+                        fill
+                        placeholder="blur"
+                        blurDataURL={urlFor(mainImage).width(20).quality(20).url() || ''}
+                        className="rounded-l-lg"
+                      />
+                    </div>
                     <div className="p-4 w-1/2">
                       <h2 className="text-xl font-semibold cursor-pointer">{title}</h2>
                       <p className="text-gray-600 text-sm my-1">
@@ -70,8 +85,8 @@ const BlogPage: React.FC<BlogPageProps> = ({ posts }) => {
                         ))}
                       {body && (
                         <p className="text-gray-800 mt-2">
-                          {toPlainText(body).length >= 100
-                            ? toPlainText(body).slice(0, 100) + '...'
+                          {toPlainText(body).length >= 80
+                            ? toPlainText(body).slice(0, 80) + '...'
                             : toPlainText(body)}
                         </p>
                       )}
@@ -86,23 +101,14 @@ const BlogPage: React.FC<BlogPageProps> = ({ posts }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps<BlogPageProps> = async () => {
-  const query = `*[_type == "post"] {
-    _id,
-    title,
-    slug,
-    body,
-    publishedAt,
-    mainImage,
-    categories[] -> {title, _id}
-  }`;
-
-  const posts = await client.fetch<BlogPost[]>(query);
+export async function getStaticProps() {
+  const posts = await fetchPosts();
 
   return {
     props: {
-      posts,
+      initialData: posts,
     },
+    revalidate: 600, // 10 minutes
   };
 };
 

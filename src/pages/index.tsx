@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { GetStaticProps } from 'next';
 import client from '../../sanityClient';
+import useSWR from 'swr';
 import RandomCatImage from '@/components/RandomCatImage';
 import Avatar from '@/components/Avatar';
 import axios from 'axios';
@@ -15,7 +16,7 @@ interface BlogPost {
 }
 
 interface HomePageProps {
-  recentPosts: BlogPost[];
+  initialData: BlogPost[];
 }
 
 type CatImageData = {
@@ -25,19 +26,32 @@ type CatImageData = {
   id: string;
 };
 
-const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
+const fetcher = (query: string) => client.fetch<BlogPost[]>(query);
+
+const Home: React.FC<HomePageProps> = ({ initialData }) => {
   const router = useRouter();
   const [formattedDates, setFormattedDates] = useState<string[]>([]);
   const [currentImage, setCurrentImage] = useState<CatImageData | null>(null);
   const [nextImage, setNextImage] = useState<CatImageData | null>(null);
   const [votingButtonsActive, setVotingButtonsActive] = useState(true);
 
+  const query = `*[_type == "post"] | order(publishedAt desc) [0..2] {
+    _id,
+    title,
+    slug,
+    publishedAt
+  }`;
+  const { data: posts = initialData } = useSWR(query, fetcher, {
+    initialData,
+    revalidateOnFocus: false,
+  });
+
   useEffect(() => {
-    const formattedDatesArray = recentPosts.map(({ publishedAt }) => {
+    const formattedDatesArray = posts.map(({ publishedAt }) => {
       return new Date(publishedAt).toDateString();
     });
     setFormattedDates(formattedDatesArray);
-  }, [recentPosts]);
+  }, [posts]);
 
   const fetchCatImages = useCallback(async () => {
     try {
@@ -177,13 +191,13 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
         <div className="p-4 hidden md:block">
           <h2 className="text-md font-semibold text-gray-800 mb-4">Recent Posts</h2>
           <ul className="space-y-4">
-            {recentPosts.map(({ _id, title = '', slug = '' }, index) => (
+            {initialData.map(({ _id, title = '', slug = '' }, index) => (
               <li key={_id}>
                 <Link href={`/blog/${encodeURIComponent(slug.current)}`}>
                   <p className="text-sm">{title}</p>
                   <p className="text-xs text-gray-400">{formattedDates[index]}</p>
                 </Link>
-                {index !== recentPosts.length - 1 && <hr className="my-4" />}
+                {index !== initialData.length - 1 && <hr className="my-4" />}
               </li>
             ))}
           </ul>
@@ -206,8 +220,9 @@ export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
 
   return {
     props: {
-      recentPosts,
+      initialData: recentPosts,
     },
+    revalidate: 600 // 10 min
   };
 };
 
