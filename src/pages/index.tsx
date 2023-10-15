@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { GetStaticProps } from 'next';
@@ -39,7 +39,7 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
     setFormattedDates(formattedDatesArray);
   }, [recentPosts]);
 
-  const fetchCatImages = async () => {
+  const fetchCatImages = useCallback(async () => {
     try {
       // Fetch only one image if there's already a currentImage, else fetch 2 images
       const limit = currentImage ? 1 : 2;
@@ -71,13 +71,13 @@ const Home: React.FC<HomePageProps> = ({ recentPosts }) => {
     } catch (error) {
       console.error("Error fetching cat images:", error);
     }
-  };
+  }, [currentImage]);
   
   
 
   useEffect(() => {
     fetchCatImages();
-  }, []);
+  }, [fetchCatImages]);
 
   
   const handleVote = async (value: number) => {
