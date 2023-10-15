@@ -1,3 +1,5 @@
-export default (req, res) => {
-    res.status(200).send('OK');
-  };
+const healthCheck = (req, res) => {
+  res.status(200).send('OK');
+};
+
+export default healthCheck;
