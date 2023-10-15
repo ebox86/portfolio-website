@@ -1,53 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import Image from "next/legacy/image"
+import React from 'react';
+import Image from "next/legacy/image";
 
 interface RandomCatImageProps {
-  onImageLoad: (image: string) => void;
+  currentImage?: string | null;
+  imageWidth?: number | null;
+  imageHeight?: number | null;
+  nextImage?: string | null;
 }
 
-const RandomCatImage: React.FC<RandomCatImageProps> = ({ onImageLoad }) => {
-  const [catImage, setCatImage] = useState<string | null>(null);
-  const [shouldFetchImage, setShouldFetchImage] = useState(true);
-  const [imageWidth, setImageWidth] = useState<number | `${number}` | undefined>(0); // Default to 0
-  const [imageHeight, setImageHeight] = useState<number | `${number}` | undefined>(0); // Default to 0
 
-  useEffect(() => {
-    if (shouldFetchImage) {
-      const fetchRandomCatImage = async () => {
-        try {
-          const response = await axios.get(`https://api.thecatapi.com/v1/images/search?api_key=${process.env.NEXT_PUBLIC_CAT_API_KEY}`);
-          if (response.data && response.data.length > 0) {
-            const imageUrl = response.data[0].url;
-            setCatImage(imageUrl);
-            onImageLoad(imageUrl); // Call the onImageLoad callback with the image URL
-
-            // Set image dimensions
-            setImageWidth(response.data[0].width);
-            setImageHeight(response.data[0].height);
-          }
-        } catch (error) {
-          console.error('Error fetching cat image:', error);
-        }
-      };
-
-      fetchRandomCatImage();
-      setShouldFetchImage(false); // Prevent further image fetching until needed again
-    }
-  }, [onImageLoad, shouldFetchImage]);
+const RandomCatImage: React.FC<RandomCatImageProps> = ({ currentImage, imageWidth, imageHeight, nextImage }) => {
   return (
     <div className="mb-4">
-      {catImage && (
-        <Image
-            src={catImage}
-            alt="Random Cat"
-            width={imageWidth}
-            height={imageHeight}
-            priority={true}
-            layout='responsive'
-            objectFit='fill'
-            className="rounded-lg shadow-md"
-        />
+      {!currentImage ? (
+        <div className="loading-spinner">Loading...</div>
+      ) : (
+        <>
+          {currentImage && (
+            <Image
+              src={currentImage}
+              alt="Random Cat"
+              width={imageWidth || 500}
+              height={imageHeight || 500}
+              priority={true}
+              layout='responsive'
+              className="rounded-lg shadow-md"
+            />
+          )}
+          {/* Preloading the next image */}
+          {nextImage && <img src={nextImage} alt="Preload Next Cat" width="0" height="0" />}
+        </>
       )}
     </div>
   );
