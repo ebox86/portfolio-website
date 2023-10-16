@@ -64,10 +64,13 @@ const getImageUrl = (imageField: any) => {
 const BlogPostPage: React.FC<BlogPostPageProps> = ({ initialData }) => {
   const { query } = useRouter();
   const { data: post } = useSWR(query.slug ? `/api/post/${query.slug}` : null, getPostBySlug, { fallbackData: initialData });
-  
+  if (!initialData) {
+    // Handle case where initialData is not available
+    return <div>Error: Blog post not found!</div>;
+  }
   return (
     <div className="bg-gray-100 mx-auto p-4">
-      <ImageComponent value={initialData.mainImage} alt={initialData.title} />
+      {initialData.mainImage && <ImageComponent value={initialData.mainImage} alt={initialData.title} />}
       <div className="mb-4">
         <h1 className="text-2xl font-semibold text-left ">{initialData.title}</h1>
         <p className="text-xs text-gray-400">{new Date(initialData.publishedAt).toDateString()}</p>
@@ -76,7 +79,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ initialData }) => {
         {initialData.body ? 
         (
           <PortableText value={initialData.body} components={components} />
-          ) : (
+        ) : (
           <p>No content available for this post.. i probably forgot to add a body.. <i>Opps</i></p>
         )}
       </div>
