@@ -34,6 +34,7 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
   const [currentImage, setCurrentImage] = useState<CatImageData | null>(null);
   const [nextImage, setNextImage] = useState<CatImageData | null>(null);
   const [votingButtonsActive, setVotingButtonsActive] = useState(true);
+  const [fallbackImage, setFallbackImage] = useState<string | null>(null);
 
   const query = `*[_type == "post"] | order(publishedAt desc) [0..2] {
     _id,
@@ -82,8 +83,13 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
           id: response.data[1].id
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching cat images:", error);
+      if (error.response && error.response.status === 429) {
+        console.error("Rate limit reached. Displaying fallback image.");
+        setFallbackImage("https://http.cat/429");
+        setVotingButtonsActive(false);
+      } 
     }
   }, [currentImage]);
   
@@ -157,7 +163,7 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
       </div>
       <div className="w-full md:w-4/5 md:float-left relative">
       <RandomCatImage 
-        currentImage={currentImage?.url}
+        currentImage={fallbackImage || currentImage?.url}
         imageWidth={currentImage?.width}
         imageHeight={currentImage?.height}
         nextImage={nextImage?.url}

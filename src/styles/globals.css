@@ -116,3 +116,56 @@
   animation: spin 1s linear infinite; /* Apply the rotating animation */
   margin: auto; /* Center the spinner */
 }
+
+.experience-timeline {
+  position: relative;
+  padding-left: 40px; /* Adjusted to account for the width of the year-box, the spur line, and some spacing */
+}
+
+/* Create the vertical line connecting the boxes */
+.experience-timeline::before {
+  content: '';
+  position: absolute;
+  top: 15px; /* Start from the center of the first box */
+  bottom: 15px; /* End at the center of the last box */
+  left: 20px; /* Adjusted position */
+  width: 1px; /* Thinner width of the line */
+  background-color: #BDBDBD; /* Light grey color */
+  z-index: 0; /* Place it behind the year boxes */
+}
+
+/* The year box styling */
+.year-box {
+  display: inline-block;
+  width: 100%; /* Full width of the column */
+  height: 30px; /* Height of the box */
+  line-height: 30px; /* Vertically center the text */
+  text-align: center; /* Horizontally center the text */
+  border-radius: 5px; /* Rounded corners */
+  background-color: #E5E5E5; /* Light grey background */
+  border: 1px solid #BDBDBD; /* Light grey fine stroke border */
+  position: relative;
+  z-index: 2; /* Place it on top of the connecting line */
+  margin-bottom: 60px; /* Space between boxes */
+}
+
+/* Add the "spur" line connecting the main vertical line to each box */
+.year-box::before {
+  content: '';
+  position: absolute;
+  top: 50%; /* Start from the center of the box */
+  left: -20px; /* Start from the left edge of the box and move leftwards */
+  width: 20px; /* Lengthened the spur line */
+  height: 1px; /* Thickness of the spur line */
+  background-color: #BDBDBD; /* Light grey color */
+  z-index: 1; /* Place it below the box but above the main line */
+}
+
+.hover-border {
+  transition: border 0.3s ease-in-out; /* Gradual transition for the border */
+}
+
+.hover-border:hover {
+  border: 1px solid rgba(0, 0, 0, 0.1); /* Light grey border on hover */
+}
+
