@@ -3,20 +3,6 @@ import Link from 'next/link';
 // import RandomShape from './RandomShape';
 
 function Header() {
-  // const getRandomClipPath = () => {
-  //   const shapes = [
-  //     'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-  //     'polygon(0% 0%, 100% 0%, 50% 100%)',
-  //     'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)',
-  //     'polygon(0% 0%, 0% 100%, 100% 50%)',
-  //     // Add more polygonal shapes as needed
-  //   ];
-
-  //   const randomIndex = Math.floor(Math.random() * shapes.length);
-  //   return shapes[randomIndex];
-    
-  // };
-
   return (
     <header className="py-4">
       <div className="container mx-auto">
@@ -26,12 +12,9 @@ function Header() {
               <div className="text-3xl relative">
                 <span className="gradient-text" data-content="@ebox86">@ebox86</span>
               </div>
-              {/* <div className="text-xs md:text-sm">
-                the personal website of Evan Kohout
-              </div> */}
             </div>
           </Link>
-          <ul className="flex space-x-4">
+          <ul className="flex space-x-4 flex-wrap justify-center">
             <li className="text-lg relative group p-2">
               <Link href="/me">About</Link>
             </li>
