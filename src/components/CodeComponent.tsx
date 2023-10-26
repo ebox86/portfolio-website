@@ -40,6 +40,9 @@ interface CodeProps {
 const CodeComponent: React.FC<CodeProps> = (props) => {
   const [copied, setCopied] = useState(false);
 
+  const language = props.value?.language === 'plain text' ? 'text' : props.value?.language || 'text';
+  const code = props.value?.code || '';
+
   const handleCopyClick = () => {
     if (props.value?.code) {
       copy(props.value.code);
@@ -60,11 +63,11 @@ const CodeComponent: React.FC<CodeProps> = (props) => {
   return (
     <div className="flex flex-col rounded-lg bg-[#282c34] shadow-md mb-4 overflow-hidden">
       <div className="flex-1 p-4">
-        <Refractor language={props.value?.language || ''} value={props.value?.code || ''} />
+        <Refractor language={language} value={code} />
       </div>
       <div className="bg-gray-700 px-2 py-1 flex justify-between items-center"> 
         <span className="text-xs text-gray-400">
-          {props.value?.language}
+          {language}
         </span>
         <div className="relative">
           <button 

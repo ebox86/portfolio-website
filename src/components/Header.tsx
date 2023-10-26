@@ -21,9 +21,9 @@ function Header() {
             <li className="text-lg relative group p-2">
               <Link href="/blog">Blog</Link>
             </li>
-            <li className="text-lg relative group p-2">
+            {/* <li className="text-lg relative group p-2">
               <Link href="/projects">Projects</Link>
-            </li>
+            </li> */}
             <li className="text-lg relative group p-2">
               <Link href="/contact">Contact</Link>
             </li>

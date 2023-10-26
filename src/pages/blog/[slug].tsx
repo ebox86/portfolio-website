@@ -44,6 +44,7 @@ const ImageComponent = (value: any) => {
         placeholder="blur"
         blurDataURL={blurUrl}
         className='object-cover'
+        sizes="(max-width: 768px) 100vw, 33vw"
       />
     </div>
   )
