@@ -66,7 +66,8 @@ const BlogPage: React.FC<BlogPageProps> = ({ initialData }) => {
                         fill
                         placeholder="blur"
                         blurDataURL={urlFor(mainImage).width(20).quality(20).url() || ''}
-                        className="rounded-l-lg"
+                        className="rounded-l-lg object-cover"
+                        sizes="(max-width: 768px) 100vw, 33vw"
                       />
                     </div>
                     <div className="p-4 w-1/2">
