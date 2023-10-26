@@ -169,3 +169,26 @@
   border: 1px solid rgba(0, 0, 0, 0.1); /* Light grey border on hover */
 }
 
+/* Base style for refractor */
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #f8f8f2;
+  background: none;
+  text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+  font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+  font-size: 1em;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+  tab-size: 4;
+  hyphens: none;
+}
+
+/* More styles can be added for individual tokens, such as keywords, comments, etc. */
+
+pre {
+  background-color: transparent !important;
+}
