@@ -5,7 +5,7 @@ import { PortableText } from '@portabletext/react';
 import client from '../../../sanityClient';
 import Image from 'next/image';
 import imageUrlBuilder from '@sanity/image-url';
-import { getImageDimensions } from '@sanity/asset-utils'
+import CodeComponent from '@/components/CodeComponent';
 
 const builder = imageUrlBuilder(client);
 
@@ -36,14 +36,14 @@ const ImageComponent = (value: any) => {
   const blurUrl = urlFor(value.value).width(20).quality(20).url(); // Low-quality blurred image
 
   return (
-    <div className="w-full h-96 relative rounded-lg shadow-md mb-4 overflow-hidden"> {/* Added wrapper div */}
+    <div className="w-full h-96 relative rounded-lg shadow-md mb-4 overflow-hidden">
       <Image
         src={imageUrl}
         alt={value.alt || ' '}
-        layout="fill"
-        objectFit="cover"
+        fill
         placeholder="blur"
         blurDataURL={blurUrl}
+        className='object-cover'
       />
     </div>
   )
@@ -52,8 +52,7 @@ const ImageComponent = (value: any) => {
 const components = {
   types: {
     image: ImageComponent,
-    // Any other custom types you have in your content
-    // Examples: mapLocation, contactForm, code, featuredProjects, latestNews, etc.
+    code: CodeComponent as any
   },
 }
 
