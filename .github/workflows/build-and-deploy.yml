@@ -26,6 +26,10 @@ jobs:
           GHCR_REPOSITORY: ${{ github.repository }}
         run: |
           docker build -t ghcr.io/$GHCR_REPOSITORY:latest \
-          --build-arg=NEXT_PUBLIC_CAT_API_KEY=${{ secrets.CAT_API_KEY }} .
+          --build-arg NEXT_PUBLIC_CAT_API_KEY=${{ secrets.NEXT_PUBLIC_CAT_API_KEY }} \
+          --build-arg MJ_APIKEY_PUBLIC=${{ secrets.MJ_APIKEY_PUBLIC }} \
+          --build-arg MJ_APIKEY_PRIVATE=${{ secrets.MJ_APIKEY_PRIVATE }} \
+          --build-arg NEXT_PUBLIC_CAPTCHA_KEY=${{ secrets.NEXT_PUBLIC_CAPTCHA_KEY }} \
+          --build-arg CAPTCHA_SECRET=${{ secrets.CAPTCHA_SECRET }} .
           docker tag ghcr.io/$GHCR_REPOSITORY:latest ghcr.io/ebox86/$GHCR_REPOSITORY:latest
           docker push ghcr.io/$GHCR_REPOSITORY:latest
