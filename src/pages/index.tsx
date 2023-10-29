@@ -56,12 +56,20 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
 
   const fetchCatImages = useCallback(async () => {
     try {
+      const isImageFromApprovedDomain = (url: string) => url.includes('.thecatapi.com');
+
       // Fetch only one image if there's already a currentImage, else fetch 2 images
       const limit = currentImage ? 1 : 2;
-      const response = await axios.get(`https://api.thecatapi.com/v1/images/search?limit=${limit}&api_key=${process.env.NEXT_PUBLIC_CAT_API_KEY}`);
+      const response = await axios.get(`/api/getCats?limit=${limit}`);
       
       if (limit === 1) {
         // We're fetching only one new image for preloading
+        if (!isImageFromApprovedDomain(response.data[0].url)) {
+          console.warn("Image from unapproved domain detected. Fetching another.");
+          fetchCatImages();
+          return;
+        }
+
         setNextImage({
           url: response.data[0].url,
           width: response.data[0].width,
@@ -70,6 +78,12 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
         });
       } else {
         // Initial load, set the currentImage and nextImage
+        if (!isImageFromApprovedDomain(response.data[0].url) || !isImageFromApprovedDomain(response.data[1].url)) {
+          console.warn("Image from unapproved domain detected. Fetching another.");
+          fetchCatImages();
+          return;
+        }
+        
         setCurrentImage({
           url: response.data[0].url,
           width: response.data[0].width,
@@ -109,13 +123,10 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
     
       setVotingButtonsActive(false); // Disable buttons during the vote
   
-      const response = await axios.post(
-        `https://api.thecatapi.com/v1/votes?api_key=${process.env.NEXT_PUBLIC_CAT_API_KEY}`,
-        {
-          image_id: currentImage.id,
-          value: value,
-        }
-      );
+      const response = await axios.post('/api/voteCat', {
+        image_id: currentImage.id,
+        value: value,
+      });
   
       // Show the preloaded image immediately
       setCurrentImage(nextImage);

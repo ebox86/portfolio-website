@@ -1,30 +1,22 @@
+import { NextApiRequest, NextApiResponse } from 'next';
+
 const Mailjet = require('node-mailjet');
-import fetch from 'node-fetch';
+const {verify} = require('hcaptcha');
 
 const mailjet = Mailjet.apiConnect(
     process.env.MJ_APIKEY_PUBLIC,
     process.env.MJ_APIKEY_PRIVATE
 );
 
-export default async (req, res) => {
+export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'POST') {
         res.setHeader('Allow', 'POST');
         return res.status(405).end('Method Not Allowed');
     }
 
-    // Verify reCAPTCHA token first
+    // Verify hCaptcha token first
     try {
-        const response = await fetch(
-            `https://hcaptcha.com/siteverify`,
-            {
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded; charset=utf-8",
-              },
-              body: `response=${req.body.captchaToken}&secret=${process.env.CAPTCHA_SECRET}`,
-              method: "POST",
-            }
-          );
-        const captchaValidation = await response.json();
+        const captchaValidation = await verify(process.env.CAPTCHA_SECRET, req.body.captchaToken)
 
         if (!captchaValidation.success) {
             return res.status(422).json({
@@ -68,13 +60,13 @@ export default async (req, res) => {
         });
 
     emailRequest
-    .then(result => {
+    .then((result: any) => {
         res.send({
             success: true,
             message: 'Thanks for contacting me!',
         });
     })
-    .catch(err => {
+    .catch((err: any) => {
         res.status(500).send({
             success: false,
             message: 'Something went wrong. Try again later',
