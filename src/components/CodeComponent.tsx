@@ -14,9 +14,9 @@ import python from 'refractor/lang/python';
 import markdown from 'refractor/lang/markdown';
 import json from 'refractor/lang/json';
 import sql from 'refractor/lang/sql';
+import sh from 'refractor/lang/shell-session'
 
 import 'prism-themes/themes/prism-atom-dark.css'; // Import the theme CSS here
-import lang from 'refractor/lang/javascript';
 
 Refractor.registerLanguage(js);
 Refractor.registerLanguage(ts);
@@ -30,6 +30,7 @@ Refractor.registerLanguage(python);
 Refractor.registerLanguage(markdown);
 Refractor.registerLanguage(json);
 Refractor.registerLanguage(sql);
+Refractor.registerLanguage(sh);
 
 interface CodeProps {
   value?: {
@@ -46,7 +47,10 @@ const CodeComponent: React.FC<CodeProps> = (props) => {
 
   if(language === 'mysql') {
     language = 'sql'
+  } else if (language === 'sh') {
+    language = 'shell-session'
   }
+    
 
   const handleCopyClick = () => {
     if (props.value?.code) {
