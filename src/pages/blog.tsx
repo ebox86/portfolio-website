@@ -24,7 +24,7 @@ interface BlogPageProps {
 }
 
 const fetchPosts = async () => {
-  const query = `*[_type == "post"] {
+  const query = `*[_type == "post"] | order(publishedAt desc) {
     _id,
     title,
     slug,
@@ -47,14 +47,12 @@ const BlogPage: React.FC<BlogPageProps> = ({ initialData }) => {
     revalidateOnFocus: false,
   });
 
-  const [formattedDates, setFormattedDates] = useState<string[]>([]);
-
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold text-gray-800 mb-4">Posts</h1>
       <ul className="mt-4 space-y-4">
         {initialData.length > 0 &&
-          initialData.map(({ _id, title = '', slug = '', mainImage = '', categories, body }, index) =>
+          initialData.map(({ _id, title = '', slug = '', mainImage = '', categories, body, publishedAt }) =>
             slug && (
               <Link key={_id} href={`/blog/${encodeURIComponent(slug.current)}`}>
                 <li className="bg-white my-4 shadow-md rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 cursor-pointer">
@@ -73,7 +71,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ initialData }) => {
                     <div className="p-4 w-1/2">
                       <h2 className="text-xl font-semibold cursor-pointer">{title}</h2>
                       <p className="text-gray-600 text-sm my-1">
-                        Published on {formattedDates[index]}
+                          Published on {new Date(publishedAt).toLocaleDateString()}
                       </p>
                       {categories &&
                         categories.map(({ _id = '', title = '' }) => (

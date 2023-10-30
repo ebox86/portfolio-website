@@ -6,6 +6,8 @@ import client from '../../../sanityClient';
 import Image from 'next/image';
 import imageUrlBuilder from '@sanity/image-url';
 import CodeComponent from '@/components/CodeComponent';
+import Link from 'next/link';
+
 
 const builder = imageUrlBuilder(client);
 
@@ -36,7 +38,7 @@ const ImageComponent = (value: any) => {
   const blurUrl = urlFor(value.value).width(20).quality(20).url(); // Low-quality blurred image
 
   return (
-    <div className="w-full h-96 relative rounded-lg shadow-md mb-4 overflow-hidden">
+    <div className="w-full h-96 relative rounded-lg shadow-md mb-4 overflow-hidden border border-black-200">
       <Image
         src={imageUrl}
         alt={value.alt || ' '}
@@ -53,9 +55,36 @@ const ImageComponent = (value: any) => {
 const components = {
   types: {
     image: ImageComponent,
-    code: CodeComponent as any
+    code: CodeComponent as any,
   },
-}
+  marks: {
+    link: (props: any) => {
+      const target = (props.value?.href || '').startsWith('http') ? '_blank' : undefined
+      return (
+        <div className='pt-2'>
+          <Link href={props.value?.href} target={target} className='text-blue-500 hover:text-blue-700'>
+            {props.children}
+          </Link>
+        </div>
+      )
+    },
+  },
+  list: {
+    bullet: (props: any) => <ul className="list-disc pl-5">{props.children}</ul>,
+    number: (props: any) => <ol className="list-decimal pl-5">{props.children}</ol>,
+  },
+  block: {
+    normal: (props: any) => <p className="mb-2">{props.children}</p>,
+    h1: (props: any) => <h1 className="text-3xl font-bold my-4">{props.children}</h1>,
+    h2: (props: any) => <h2 className="text-2xl font-bold my-3">{props.children}</h2>,
+    h3: (props: any) => <h3 className="text-xl font-bold my-2">{props.children}</h3>,
+    h4: (props: any) => <h4 className="text-lg font-bold my-1">{props.children}</h4>,
+    blockquote: (props: any) => (
+      <blockquote className="pl-2 py-2 border-l-2 border-black italic text-gray-700">{props.children}</blockquote>
+    )
+  },
+};
+
 
 const getImageUrl = (imageField: any) => {
   return builder.image(imageField).url() || '';
@@ -72,7 +101,7 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ initialData }) => {
     <div className="bg-gray-100 mx-auto p-4">
       {initialData.mainImage && <ImageComponent value={initialData.mainImage} alt={initialData.title} />}
       <div className="mb-4">
-        <h1 className="text-2xl font-semibold text-left ">{initialData.title}</h1>
+        <h1 className="text-3xl font-semibold text-left ">{initialData.title}</h1>
         <p className="text-xs text-gray-400">{new Date(initialData.publishedAt).toDateString()}</p>
       </div>
       <div className="bg-white rounded-lg shadow-md p-4">
