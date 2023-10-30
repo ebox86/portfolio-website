@@ -57,14 +57,15 @@ const BlogPage: React.FC<BlogPageProps> = ({ initialData }) => {
               <Link key={_id} href={`/blog/${encodeURIComponent(slug.current)}`}>
                 <li className="bg-white my-4 shadow-md rounded-lg hover:shadow-lg transition duration-300 transform hover:scale-105 cursor-pointer">
                   <div className="flex">
-                    <div className="relative w-1/2 h-48">
+                    <div className="relative w-1/2">
                       <Image
                         src={urlFor(mainImage).width(400).quality(80).url() || ''}
                         alt={title}
                         fill
                         placeholder="blur"
+                        objectFit='cover'
                         blurDataURL={urlFor(mainImage).width(20).quality(20).url() || ''}
-                        className="rounded-l-lg object-cover"
+                        className="rounded-l-lg object-fit"
                         sizes="(max-width: 768px) 100vw, 33vw"
                       />
                     </div>
