@@ -1,6 +1,6 @@
 import React, { useState, useEffect }  from 'react';
 import Refractor from 'react-refractor';
-import { FaClipboard } from 'react-icons/fa'; // Importing clipboard icon from react-icons
+import { FaClipboard } from 'react-icons/fa';
 import copy from 'clipboard-copy';
 import js from 'refractor/lang/javascript';
 import ts from 'refractor/lang/typescript';
@@ -16,7 +16,7 @@ import json from 'refractor/lang/json';
 import sql from 'refractor/lang/sql';
 import sh from 'refractor/lang/shell-session'
 
-import 'prism-themes/themes/prism-atom-dark.css'; // Import the theme CSS here
+import 'prism-themes/themes/prism-atom-dark.css'; 
 
 Refractor.registerLanguage(js);
 Refractor.registerLanguage(ts);

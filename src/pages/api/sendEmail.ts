@@ -8,7 +8,7 @@ const mailjet = Mailjet.apiConnect(
     process.env.MJ_APIKEY_PRIVATE
 );
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const sendEmail = async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method !== 'POST') {
         res.setHeader('Allow', 'POST');
         return res.status(405).end('Method Not Allowed');
@@ -73,3 +73,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
         });
     });
 };
+
+export default sendEmail

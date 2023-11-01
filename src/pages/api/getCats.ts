@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const getCats = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'GET') {
         const limit: number = Number(req.query.limit);
@@ -14,3 +14,4 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(500).json({ error: 'Failed to fetch cat data' });
   }
 };
+export default getCats

@@ -49,7 +49,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ initialData }) => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">Posts</h1>
+      <h1 className="text-5xl font-bold text-gray-800 mb-4">Posts</h1>
       <ul className="mt-4 space-y-4">
         {initialData.length > 0 &&
           initialData.map(({ _id, title = '', slug = '', mainImage = '', categories, body, publishedAt }) =>
@@ -63,9 +63,8 @@ const BlogPage: React.FC<BlogPageProps> = ({ initialData }) => {
                         alt={title}
                         fill
                         placeholder="blur"
-                        objectFit='cover'
                         blurDataURL={urlFor(mainImage).width(20).quality(20).url() || ''}
-                        className="rounded-l-lg object-fit"
+                        className="rounded-l-lg object-cover"
                         sizes="(max-width: 768px) 100vw, 33vw"
                       />
                     </div>

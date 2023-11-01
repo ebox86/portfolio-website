@@ -145,9 +145,12 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
       <div className="container mx-auto max-w-screen-md">
         <div>
           <div className="pt-6 pb-2 w-full md:w-4/6 md:float-left relative text-center md:text-left">
-          <h1 className="text-4xl font-bold text-gray-800">👋 Hey, I&apos;m Evan</h1>
-          <p className="text-gray-700 py-2">
+          <h1 className="text-5xl font-bold text-gray-800 mb-2">👋 Hey, I&apos;m Evan</h1>
+          <p className="text-gray-700 py-1 text-xl">
             Engineer. Traveler. Thinker. Creator.
+          </p>
+          <p className="py-1">
+            💁🏻‍♂️ He/him   📍 Seattle, WA
           </p>
           <div className="flex flex-col md:flex-row md:items-center">
             <button 

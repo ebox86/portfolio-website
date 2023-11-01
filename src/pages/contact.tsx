@@ -88,7 +88,7 @@ const ContactPage = () => {
     <div className="flex flex-col md:flex-row">
       {/* Contact Form Column */}
       <div className="md:flex-1 p-4 relative">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">Let&apos;s Connect</h1>
+        <h1 className="text-5xl font-bold text-gray-800 mb-4">Let&apos;s Connect</h1>
         <form onSubmit={handleSubmit}>
           {/* Name Field */}
           <div className="mb-4">
