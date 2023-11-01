@@ -1,3 +1,4 @@
+'use client';
 import React from 'react';
 import Image from 'next/image';
 import imageUrlBuilder from '@sanity/image-url';
@@ -24,9 +25,9 @@ const ImageComponent: React.FC<ImageComponentProps> = ({ value }) => {
         src={imageUrl}
         alt={value.alt || ' '}
         layout="fill"
-        objectFit="cover"
         placeholder="blur"
         blurDataURL={blurUrl}
+        className='object-cover'
       />
     </div>
   );

@@ -21,12 +21,12 @@ type AboutPageProps = {
 const AboutPage: React.FC<AboutPageProps> = ({ experiences }) => {
   return (
     <div className="container mx-auto p-4 max-w-screen-md space-y-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">About Me</h1>
-      
+      <h1 className="text-5xl font-bold text-gray-800 mb-4">Me</h1>
       {/* Introduction */}
-      <p className="text-lg text-gray-700">
-        I&apos;m Evan, a passionate infrastructure developer with over 12 years of experience in the tech industry. I&apos;ve had the privilege of working with several renowned companies, contributing to projects that challenged and honed my skills.
-      </p>
+      <h1 className="text-lg text-gray-700">
+        I&apos;m Evan 👨‍💻, a passionate infrastructure developer ⚙️ with over 12 years of experience in the tech industry 💼. 
+      </h1>
+      <h2 className="text-3xl font-semibold text-gray-800">Professional Experience</h2>
       {/* Experience Timeline */}
       <div className="experience-timeline">
         {experiences.map((experience, index) => (
@@ -66,7 +66,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ experiences }) => {
       </div>
       {/* Personal Activities */}
       <div className="space-y-6">
-        <h2 className="text-2xl font-semibold text-gray-800">Personal Activities</h2>
+        <h2 className="text-3xl font-semibold text-gray-800">Personal Activities</h2>
         <div className="grid grid-cols-2 gap-4">
           <div className="relative w-full h-60 transform -rotate-2 rounded-lg overflow-hidden">
             <Image 
@@ -93,7 +93,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ experiences }) => {
           </div>
         </div>
         <p className="text-lg text-gray-700">
-          Outside of my professional life, I&apos;m an avid runner, hiker, skiier and take great pride in contributing back to the community through volunteering.
+          Outside of my professional life, I&apos;m an avid runner 🏃‍♂️, hiker 🥾, skiier ⛷️ and take great pride in contributing back to the community through volunteering.
         </p>
       </div>
     </div>

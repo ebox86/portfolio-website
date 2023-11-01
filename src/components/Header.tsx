@@ -1,8 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-// import RandomShape from './RandomShape';
 
-function Header() {
+const Header: React.FC = () => {
   return (
     <header className="py-4">
       <div className="container mx-auto">

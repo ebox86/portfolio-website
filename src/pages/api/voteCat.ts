@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import axios from 'axios';
 
-export default async (req: NextApiRequest, res: NextApiResponse) => {
+const voteCats = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'POST') {
       const { image_id, value } = req.body;
@@ -28,3 +28,5 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(500).json(error.response?.data || {});
   }
 };
+
+export default voteCats
