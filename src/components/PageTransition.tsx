@@ -15,13 +15,13 @@ const pageTransition = {
 
 interface PageTransitionProps {
   children: ReactNode;
-  key: string;
+  route: string;
 }
 
-const PageTransition: React.FC<PageTransitionProps> = ({ children, key }) => {
+const PageTransition: React.FC<PageTransitionProps> = ({ children, route }) => {
   return (
     <motion.div
-      key={key}
+      key={route}
       initial="initial"
       animate="in"
       exit="out"

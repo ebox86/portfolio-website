@@ -5,11 +5,11 @@ import Head from 'next/head';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PageTransition from '../components/PageTransition'; 
-import { useRouter } from 'next/router';
+import { usePathname } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion';
 
 function Layout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+  const pathname = usePathname()
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
@@ -32,7 +32,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         <Header />
         <main className="px-4 py-8">
         <AnimatePresence mode='wait'>
-          <PageTransition key={router.route}>
+          <PageTransition route={pathname || ''}>
             {children}
           </PageTransition>
         </AnimatePresence>
