@@ -1,11 +1,10 @@
+"use client";
+
 import React from 'react';
 import Image from 'next/image';
 import { FaDownload } from 'react-icons/fa';
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
 
-type Experience = {
+export type Experience = {
   title: string;
   startYear: number;
   endYear: number;
@@ -14,11 +13,12 @@ type Experience = {
   skills: string[];
 };
 
-type AboutPageProps = {
+export type AboutPageProps = {
   experiences: Experience[];
 };
 
 const AboutPage: React.FC<AboutPageProps> = ({ experiences }) => {
+  console.log('about me page rendered')
   return (
     <div className="container mx-auto p-4 max-w-screen-md space-y-8">
       <h1 className="text-5xl font-bold text-gray-800 mb-4">Me</h1>
@@ -99,30 +99,5 @@ const AboutPage: React.FC<AboutPageProps> = ({ experiences }) => {
     </div>
   );
 };
-
-export async function getStaticProps() {
-  const experiencesDirectory = path.join(process.cwd(), 'src/data/experiences');
-  const filenames = fs.readdirSync(experiencesDirectory);
-  const experiences = filenames.map(filename => {
-    const filePath = path.join(experiencesDirectory, filename);
-    const fileContents = fs.readFileSync(filePath, 'utf8');
-    const { data } = matter(fileContents);
-
-    // Check if the data has a 'skills' field and convert it to an array
-    if (data.skills && typeof data.skills === 'string') {
-      data.skills = data.skills.split(',').map(skill => skill.trim());
-    }
-
-    return data;
-  });
-
-  experiences.sort((a, b) => b.startYear - a.startYear);
-  return {
-    props: {
-      experiences,
-    },
-  };
-}
-
 
 export default AboutPage;

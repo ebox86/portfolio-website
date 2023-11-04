@@ -4,8 +4,7 @@ import axios from 'axios';
 const voteCats = async (req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (req.method === 'POST') {
-      const { image_id, value } = req.body;
-
+      const { image_id, value } = JSON.parse(req.body);
       if (!image_id || value === undefined) {
         return res.status(400).json({ message: 'image_id and value are required in the request body.' });
       }

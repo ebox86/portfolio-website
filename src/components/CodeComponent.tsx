@@ -39,11 +39,11 @@ interface CodeProps {
   };
 }
 
-const CodeComponent: React.FC<CodeProps> = (props) => {
+const CodeComponent: React.FC<CodeProps> = ({value}) => {
   const [copied, setCopied] = useState(false);
 
-  var language = props.value?.language === 'plain text' ? 'text' : props.value?.language || 'text';
-  const code = props.value?.code || '';
+  var language = value?.language === 'plain text' ? 'text' : value?.language || 'text';
+  const code = value?.code || '';
 
   if(language === 'mysql') {
     language = 'sql'
@@ -53,8 +53,8 @@ const CodeComponent: React.FC<CodeProps> = (props) => {
     
 
   const handleCopyClick = () => {
-    if (props.value?.code) {
-      copy(props.value.code);
+    if (value?.code) {
+      copy(value.code);
       setCopied(true); // Set copied state to true
     }
   };

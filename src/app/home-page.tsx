@@ -1,146 +1,118 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+"use client";
+
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { GetStaticProps } from 'next';
-import client from '../../sanityClient';
-import useSWR from 'swr';
 import RandomCatImage from '@/components/RandomCatImage';
 import Avatar from '@/components/Avatar';
-import axios from 'axios';
 
-interface BlogPost {
+export interface BlogPost {
   _id: string;
   title: string;
   slug: any;
   publishedAt: string;
 }
 
-interface HomePageProps {
-  initialData: BlogPost[];
+export interface HomePageProps {
+  posts: BlogPost[];
 }
 
-type CatImageData = {
+export type CatImageData = {
   url: string;
   width: number;
   height: number;
   id: string;
 };
 
-const fetcher = (query: string) => client.fetch<BlogPost[]>(query);
-
-const Home: React.FC<HomePageProps> = ({ initialData }) => {
+const Home: React.FC<HomePageProps> = ({ posts }) => {
   const router = useRouter();
-  const [formattedDates, setFormattedDates] = useState<string[]>([]);
   const [currentImage, setCurrentImage] = useState<CatImageData | null>(null);
   const [nextImage, setNextImage] = useState<CatImageData | null>(null);
   const [votingButtonsActive, setVotingButtonsActive] = useState(true);
   const [fallbackImage, setFallbackImage] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+  const hasFetchedOnce = useRef(false);
 
-  const query = `*[_type == "post"] | order(publishedAt desc) [0..2] {
-    _id,
-    title,
-    slug,
-    publishedAt
-  }`;
-  const { data: posts = initialData } = useSWR(query, fetcher, {
-    initialData,
-    revalidateOnFocus: false,
+
+  const setImage = (data: CatImageData[], index: number) => ({
+    url: data[index].url,
+    width: data[index].width,
+    height: data[index].height,
+    id: data[index].id
   });
+  
 
-  useEffect(() => {
-    const formattedDatesArray = posts.map(({ publishedAt }) => {
-      return new Date(publishedAt).toDateString();
-    });
-    setFormattedDates(formattedDatesArray);
-  }, [posts]);
-
-  const fetchCatImages = useCallback(async () => {
+  const fetchCatImages = useCallback(async (limit: number) => {
+    if (isFetching) return;
+    setIsFetching(true);
+    
     try {
-      const isImageFromApprovedDomain = (url: string) => url.includes('.thecatapi.com');
-
-      // Fetch only one image if there's already a currentImage, else fetch 2 images
-      const limit = currentImage ? 1 : 2;
-      const response = await axios.get(`/api/getCats?limit=${limit}`);
-      
-      if (limit === 1) {
-        // We're fetching only one new image for preloading
-        if (!isImageFromApprovedDomain(response.data[0].url)) {
-          console.warn("Image from unapproved domain detected. Fetching another.");
-          fetchCatImages();
-          return;
+        const response = await fetch(`/api/getCats?limit=${limit}`);
+        if (!response.ok) {
+        throw new Error('Failed to fetch data');
         }
+        const data = await response.json();
 
-        setNextImage({
-          url: response.data[0].url,
-          width: response.data[0].width,
-          height: response.data[0].height,
-          id: response.data[0].id
-        });
-      } else {
-        // Initial load, set the currentImage and nextImage
-        if (!isImageFromApprovedDomain(response.data[0].url) || !isImageFromApprovedDomain(response.data[1].url)) {
-          console.warn("Image from unapproved domain detected. Fetching another.");
-          fetchCatImages();
-          return;
+        if (limit === 1) {
+            setNextImage(setImage(data, 0));
+        } else {
+            setCurrentImage(setImage(data, 0));
+            setNextImage(setImage(data, 1));
         }
-        
-        setCurrentImage({
-          url: response.data[0].url,
-          width: response.data[0].width,
-          height: response.data[0].height,
-          id: response.data[0].id
-        });
-        setNextImage({
-          url: response.data[1].url,
-          width: response.data[1].width,
-          height: response.data[1].height,
-          id: response.data[1].id
-        });
-      }
     } catch (error: any) {
-      console.error("Error fetching cat images:", error);
-      if (error.response && error.response.status === 429) {
-        console.error("Rate limit reached. Displaying fallback image.");
-        setFallbackImage("https://http.cat/429");
-        setVotingButtonsActive(false);
-      } 
-    }
-  }, [currentImage]);
-  
+        console.error("Error fetching cat images:", error);
+        if (error.response && error.response.status === 429) {
+          console.error("Rate limit reached. Displaying fallback image.");
+          setFallbackImage("https://http.cat/429");
+          setVotingButtonsActive(false);
+        }
+      } finally {
+        setIsFetching(false);
+      }
+    }, []);
   
 
-  useEffect(() => {
-    fetchCatImages();
-  }, [fetchCatImages]);
-
-  
   const handleVote = async (value: number) => {
     try {
-      if (!currentImage) {
-        console.error('No cat image loaded.');
+        if (!currentImage) {
+            console.error('No cat image loaded.');
         return;
-      }
-    
-      setVotingButtonsActive(false); // Disable buttons during the vote
-  
-      const response = await axios.post('/api/voteCat', {
-        image_id: currentImage.id,
-        value: value,
-      });
-  
-      // Show the preloaded image immediately
-      setCurrentImage(nextImage);
-      setNextImage(null);
-  
-      // Fetch two new images in the background
-      fetchCatImages();
-  
-      setVotingButtonsActive(true);
+        }
+        setVotingButtonsActive(false);
+        const response = await fetch(
+            '/api/voteCat', 
+            {
+                method: "POST",
+                body: JSON.stringify(
+                    {
+                        image_id: currentImage.id,
+                        value,
+                    }
+                )
+            }
+        );
+        if(!response.ok){
+            throw new Error('failed to submit vote')
+        }
+        setCurrentImage(nextImage);
+        setNextImage(null);
+        fetchCatImages(1);
+        setVotingButtonsActive(true);
     } catch (error) {
-      console.error('Error voting:', error);
+        console.error('Error voting:', error);
     }
-  };
-  
+    };
+    
+    useEffect(() => {
+        if (currentImage === null && nextImage === null && !isFetching && !hasFetchedOnce.current) {
+          hasFetchedOnce.current = true;
+          fetchCatImages(2);
+        }
+        else if (currentImage !== null && nextImage === null && !isFetching) {
+          fetchCatImages(1);
+        }
+      }, [fetchCatImages, currentImage, nextImage]);
+
   return (
       <div className="container mx-auto max-w-screen-md">
         <div>
@@ -180,7 +152,6 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
         currentImage={fallbackImage || currentImage?.url}
         imageWidth={currentImage?.width}
         imageHeight={currentImage?.height}
-        nextImage={nextImage?.url}
       />
         <div className="absolute inset-0 flex items-center justify-center">
           <button
@@ -211,13 +182,13 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
         <div className="p-4 hidden md:block">
           <h2 className="text-md font-semibold text-gray-800 mb-4">Recent Posts</h2>
           <ul className="space-y-4">
-            {initialData.map(({ _id, title = '', slug = '' }, index) => (
+            {posts.map(({ _id, title = '', slug = '', publishedAt }, index) => (
               <li key={_id}>
                 <Link href={`/blog/${encodeURIComponent(slug.current)}`}>
                   <p className="text-sm">{title}</p>
-                  <p className="text-xs text-gray-400">{formattedDates[index]}</p>
+                  <p className="text-xs text-gray-400">{new Date(publishedAt).toLocaleDateString()}</p>
                 </Link>
-                {index !== initialData.length - 1 && <hr className="my-4" />}
+                {index !== posts.length - 1 && <hr className="my-4" />}
               </li>
             ))}
           </ul>
@@ -226,24 +197,6 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
       <div style={{ clear: 'both' }}></div>
     </div>
   );
-};
-
-export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  const query = `*[_type == "post"] | order(publishedAt desc) [0..2] {
-    _id,
-    title,
-    slug,
-    publishedAt
-  }`;
-
-  const recentPosts = await client.fetch<BlogPost[]>(query);
-
-  return {
-    props: {
-      initialData: recentPosts,
-    },
-    revalidate: 600 // 10 min
-  };
 };
 
 export default Home;

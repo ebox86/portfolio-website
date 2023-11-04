@@ -1,9 +1,12 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from 'react';
 import { FaLinkedin, FaGithub } from 'react-icons/fa';
 import { RiTwitterXFill, RiCloseLine } from 'react-icons/ri';
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 
-const ContactPage = () => {
+const Page = () => {
+    console.log("contact page rendered")
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [userMessage, setUserMessage] = useState('');
@@ -13,6 +16,7 @@ const ContactPage = () => {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('use effect called')
     let timer: NodeJS.Timeout;
     if (feedbackMessage) {
       timer = setTimeout(() => {
@@ -24,64 +28,65 @@ const ContactPage = () => {
   }, [feedbackMessage]);
 
   const validateEmail = (email: string) => {
+
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    return emailPattern.test(email);
-  };
+        return emailPattern.test(email);
+    };
 
-  const onCaptchaChange = (token: any) => {
-    setCaptchaToken(token);
-  };
-  
+    const onCaptchaChange = (token: any) => {
+        setCaptchaToken(token);
+    };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
   
-    // Validation
-    let valid = true;
-    if (name.trim().length < 1) {
-      setFeedbackMessage('Name is required.');
-      valid = false;
-    } else if (!validateEmail(email)) {
-      setFeedbackMessage('Invalid email format.');
-      valid = false;
-    } else if (userMessage.length < 1 || userMessage.length > 500) {
-      setFeedbackMessage('Message should be between 1 and 500 characters.');
-      valid = false;
-    } else if (!captchaToken) {
-      setFeedbackMessage('Invalid captcha.');
-      valid = false;
-    }
-  
-    if (!valid) return;
-  
-    setIsSending(true);
-  
-    try {
-      const response = await fetch('/api/sendEmail', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          message: userMessage.trim(),
-          captchaToken: captchaToken
-        }),
-      });
-  
-      const data = await response.json();
-      setIsSending(false);
-      if (data.success) {
-        setFeedbackMessage('Thanks for reaching out!');
-        setIsSuccess(true);
-      } else {
-        throw new Error(data.message);
-      }
-    } catch (error) {
-      setFeedbackMessage((error as any)?.message || 'Something went wrong.');
-      setIsSuccess(false);
-    }
+        // Validation
+        let valid = true;
+        if (name.trim().length < 1) {
+            setFeedbackMessage('Name is required.');
+            valid = false;
+        } else if (!validateEmail(email)) {
+            setFeedbackMessage('Invalid email format.');
+            valid = false;
+        } else if (userMessage.length < 1 || userMessage.length > 500) {
+            setFeedbackMessage('Message should be between 1 and 500 characters.');
+            valid = false;
+        } else if (!captchaToken) {
+            setFeedbackMessage('Invalid captcha.');
+            valid = false;
+        }
+
+        if (!valid) return;
+
+        setIsSending(true);
+
+        try {
+            const response = await fetch('/api/sendEmail', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name.trim(),
+                email: email.trim(),
+                message: userMessage.trim(),
+                captchaToken: captchaToken
+            }),
+            });
+
+            const data = await response.json();
+            setIsSending(false);
+            if (data.success) {
+            setFeedbackMessage('Thanks for reaching out!');
+            setIsSuccess(true);
+            } else {
+            throw new Error(data.message);
+            }
+        } catch (error) {
+            setFeedbackMessage((error as any)?.message || 'Something went wrong.');
+            setIsSuccess(false);
+        }
   };
 
   return (
@@ -200,4 +205,4 @@ const ContactPage = () => {
   );
 };
 
-export default ContactPage;
+export default Page;
