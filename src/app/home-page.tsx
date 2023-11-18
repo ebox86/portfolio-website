@@ -69,7 +69,7 @@ const Home: React.FC<HomePageProps> = ({ posts }) => {
       } finally {
         setIsFetching(false);
       }
-    }, []);
+    }, [isFetching]);
   
 
   const handleVote = async (value: number) => {
@@ -111,7 +111,7 @@ const Home: React.FC<HomePageProps> = ({ posts }) => {
         else if (currentImage !== null && nextImage === null && !isFetching) {
           fetchCatImages(1);
         }
-      }, [fetchCatImages, currentImage, nextImage]);
+      }, [fetchCatImages, currentImage, nextImage, isFetching]);
 
   return (
       <div className="container mx-auto max-w-screen-md">

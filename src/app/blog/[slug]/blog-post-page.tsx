@@ -59,14 +59,15 @@ const components = {
     },
   },
   list: {
-    bullet: (props: any) => <ul className="list-disc pl-5 mb-4">{props.children}</ul>,
-    number: (props: any) => <ol className="list-decimal pl-5 mb-4">{props.children}</ol>,
+    bullet: (props: any) => <ul className="list-disc pl-10 mb-4">{props.children}</ul>,
+    number: (props: any) => <ol className="list-decimal pl-10 mb-4">{props.children}</ol>,
   },
   listItem: {
     bullet: (props: any) => <li className='mb-2' style={{listStyleType: 'disclosure-closed'}}>{props.children}</li>,
+    number: (props: any) => <li className='mb-2'>{props.children}</li>,
   },
   block: {
-    normal: (props: any) => <p className="mb-4 py-0.5">{props.children}</p>,
+    normal: (props: any) => <p className="mb-4 py-2 leading-7">{props.children}</p>,
     h1: (props: any) => <h1 className="text-4xl font-bold my-6">{props.children}</h1>,
     h2: (props: any) => <h2 className="text-3xl font-bold my-5">{props.children}</h2>,
     h3: (props: any) => <h3 className="text-2xl font-bold my-4">{props.children}</h3>,
@@ -87,7 +88,7 @@ const BlogPostPage: React.FC<BlogPost> = async (post) => {
       {post.mainImage && <ImageComponent value={post.mainImage} alt={post.title} />}
       <div className="mb-4">
         <h1 className="text-5xl font-semibold text-left ">{post.title}</h1>
-        <p className="text-xs text-gray-400">{new Date(post.publishedAt).toDateString()}</p>
+        <p className="text-xs text-gray-400 pt-4">{new Date(post.publishedAt).toDateString()}</p>
       </div>
       <div className="bg-white rounded-lg shadow-md p-4">
         {post.body ? 
