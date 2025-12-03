@@ -1,18 +1,15 @@
-'use client';
-
 import React from 'react';
 import Head from 'next/head';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import PageTransition from '../components/PageTransition'; 
-import { usePathname } from 'next/navigation'
-import { AnimatePresence } from 'framer-motion';
+import Header from './Header';
+import Footer from './Footer';
 
-function Layout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
+type LayoutProps = {
+  children: React.ReactNode;
+};
 
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div className="flex flex-col min-h-screen bg-gray-100 text-gray-900">
       <Head>
         <title>@ebox86</title>
         <meta name="description" content="The personal website of Evan Kohout" />
@@ -30,16 +27,11 @@ function Layout({ children }: { children: React.ReactNode }) {
       </Head>
       <div className="container mx-auto max-w-screen-md flex-grow">
         <Header />
-        <main className="px-4 py-8">
-        <AnimatePresence mode='wait'>
-          <PageTransition route={pathname || ''}>
-            {children}
-          </PageTransition>
-        </AnimatePresence>
-      </main>
+        <main className="px-4 py-8">{children}</main>
       </div>
       <Footer />
     </div>
   );
-}
+};
+
 export default Layout;

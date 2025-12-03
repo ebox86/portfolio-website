@@ -4,6 +4,7 @@ import { RiTwitterXFill, RiCloseLine } from 'react-icons/ri';
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 const ContactPage = () => {
+  const [captchaSiteKey, setCaptchaSiteKey] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [userMessage, setUserMessage] = useState('');
@@ -11,6 +12,7 @@ const ContactPage = () => {
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const hasCaptcha = Boolean(captchaSiteKey);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -22,6 +24,30 @@ const ContactPage = () => {
     }
     return () => clearTimeout(timer);
   }, [feedbackMessage]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchCaptchaKey = async () => {
+      try {
+        const res = await fetch('/api/captcha-sitekey');
+        if (!res.ok) {
+          return;
+        }
+        const data = await res.json();
+        if (!cancelled && data?.siteKey) {
+          setCaptchaSiteKey(data.siteKey);
+        }
+      } catch (error) {
+        // Fail silently; form will stay disabled without a captcha key.
+      }
+    };
+
+    fetchCaptchaKey();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const validateEmail = (email: string) => {
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
@@ -35,6 +61,11 @@ const ContactPage = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!hasCaptcha) {
+      setFeedbackMessage('Contact form is disabled because the captcha key is missing.');
+      return;
+    }
   
     // Validation
     let valid = true;
@@ -147,16 +178,22 @@ const ContactPage = () => {
               </p>
           </div>
           <div className="flex justify-center items-center">
+            {hasCaptcha ? (
               <HCaptcha
-                  sitekey={process.env.NEXT_PUBLIC_CAPTCHA_KEY || ''}
-                  onVerify={onCaptchaChange}
+                sitekey={captchaSiteKey}
+                onVerify={onCaptchaChange}
               />
+            ) : (
+              <div className="text-sm text-red-700 bg-red-100 border border-red-300 px-3 py-2 rounded">
+                Captcha key missing; contact form disabled in this environment.
+              </div>
+            )}
           </div>
           <div className="text-center m-4">
             <button
               type="submit"
-              className={`py-2 px-4 bg-indigo-600 text-white rounded-md ${isSending || isSuccess ? '' : 'hover:bg-indigo-700'} focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2`}
-              disabled={isSending || feedbackMessage !== '' || isSuccess ? true : false}
+              className={`py-2 px-4 bg-indigo-600 text-white rounded-md ${isSending || isSuccess || !hasCaptcha ? '' : 'hover:bg-indigo-700'} focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2`}
+              disabled={isSending || feedbackMessage !== '' || isSuccess || !hasCaptcha ? true : false}
             >
               ✉️ Send
             </button>

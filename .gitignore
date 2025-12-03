@@ -27,6 +27,7 @@ yarn-error.log*
 # local env files
 .env*.local
 env.local.json
+.env
 
 # vercel
 .vercel
@@ -35,3 +36,6 @@ env.local.json
 *.tsbuildinfo
 next-env.d.ts
 blog/dist/static/
+# Snyk Security Extension - AI Rules (auto-generated)
+.cursor/rules/snyk_rules.mdc
+.env.cloudrun

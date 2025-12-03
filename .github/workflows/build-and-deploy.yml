@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build-and-push:
@@ -26,10 +27,50 @@ jobs:
           GHCR_REPOSITORY: ${{ github.repository }}
         run: |
           docker build -t ghcr.io/$GHCR_REPOSITORY:latest \
-          --build-arg CAT_API_KEY=${{ secrets.CAT_API_KEY }} \
-          --build-arg MJ_APIKEY_PUBLIC=${{ secrets.MJ_APIKEY_PUBLIC }} \
-          --build-arg MJ_APIKEY_PRIVATE=${{ secrets.MJ_APIKEY_PRIVATE }} \
-          --build-arg NEXT_PUBLIC_CAPTCHA_KEY=${{ secrets.NEXT_PUBLIC_CAPTCHA_KEY }} \
-          --build-arg CAPTCHA_SECRET=${{ secrets.CAPTCHA_SECRET }} .
+          --build-arg NEXT_PUBLIC_CAPTCHA_KEY=${{ secrets.NEXT_PUBLIC_CAPTCHA_KEY }} .
           docker tag ghcr.io/$GHCR_REPOSITORY:latest ghcr.io/ebox86/$GHCR_REPOSITORY:latest
           docker push ghcr.io/$GHCR_REPOSITORY:latest
+
+  deploy-cloud-run:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up gcloud auth (Workload Identity Federation)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+
+      - name: Install gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Write Cloud Run env vars from GitHub Secrets
+        run: |
+          cat > cloudrun.env <<EOF
+          CAT_API_KEY=${{ secrets.CAT_API_KEY }}
+          MJ_APIKEY_PUBLIC=${{ secrets.MJ_APIKEY_PUBLIC }}
+          MJ_APIKEY_PRIVATE=${{ secrets.MJ_APIKEY_PRIVATE }}
+          CAPTCHA_SECRET=${{ secrets.CAPTCHA_SECRET }}
+          NEXT_PUBLIC_CAPTCHA_KEY=${{ secrets.NEXT_PUBLIC_CAPTCHA_KEY }}
+          EOF
+
+      - name: Deploy to Cloud Run
+        env:
+          SERVICE: ${{ secrets.CLOUD_RUN_SERVICE }}
+          REGION: ${{ secrets.CLOUD_RUN_REGION }}
+          IMAGE: ghcr.io/${{ github.repository }}:latest
+        run: |
+          gcloud run deploy "$SERVICE" \
+            --region "$REGION" \
+            --platform managed \
+            --image "$IMAGE" \
+            --allow-unauthenticated \
+            --env-vars-file cloudrun.env
