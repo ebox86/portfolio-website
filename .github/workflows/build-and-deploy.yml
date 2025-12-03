@@ -66,8 +66,9 @@ jobs:
         env:
           SERVICE: ${{ secrets.CLOUD_RUN_SERVICE }}
           REGION: ${{ secrets.CLOUD_RUN_REGION }}
-          IMAGE: ghcr.io/${{ github.repository }}:latest
+          CLOUD_RUN_IMAGE: ${{ secrets.CLOUD_RUN_IMAGE }}
         run: |
+          IMAGE="${CLOUD_RUN_IMAGE:-ghcr.io/${GITHUB_REPOSITORY}:latest}"
           gcloud run deploy "$SERVICE" \
             --region "$REGION" \
             --platform managed \
