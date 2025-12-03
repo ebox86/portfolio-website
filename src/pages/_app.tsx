@@ -1,11 +1,7 @@
 import '../styles/globals.css';
 import { AppProps } from 'next/app';
 import localFont from 'next/font/local';
-import dynamic from 'next/dynamic';
-
-const Layout = dynamic(() => import('../app/layout'), {
-  ssr: false,
-});
+import Layout from '../components/Layout';
 
 const fira = localFont({
   src: [

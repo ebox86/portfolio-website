@@ -4,6 +4,9 @@ import { RiTwitterXFill, RiCloseLine } from 'react-icons/ri';
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 const ContactPage = () => {
+  const captchaSiteKey = process.env.NEXT_PUBLIC_CAPTCHA_KEY || '';
+  const hasCaptcha = Boolean(captchaSiteKey);
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [userMessage, setUserMessage] = useState('');
@@ -35,6 +38,11 @@ const ContactPage = () => {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!hasCaptcha) {
+      setFeedbackMessage('Contact form is disabled because the captcha key is missing.');
+      return;
+    }
   
     // Validation
     let valid = true;
@@ -147,16 +155,22 @@ const ContactPage = () => {
               </p>
           </div>
           <div className="flex justify-center items-center">
+            {hasCaptcha ? (
               <HCaptcha
-                  sitekey={process.env.NEXT_PUBLIC_CAPTCHA_KEY || ''}
-                  onVerify={onCaptchaChange}
+                sitekey={captchaSiteKey}
+                onVerify={onCaptchaChange}
               />
+            ) : (
+              <div className="text-sm text-red-700 bg-red-100 border border-red-300 px-3 py-2 rounded">
+                Captcha key missing; contact form disabled in this environment.
+              </div>
+            )}
           </div>
           <div className="text-center m-4">
             <button
               type="submit"
-              className={`py-2 px-4 bg-indigo-600 text-white rounded-md ${isSending || isSuccess ? '' : 'hover:bg-indigo-700'} focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2`}
-              disabled={isSending || feedbackMessage !== '' || isSuccess ? true : false}
+              className={`py-2 px-4 bg-indigo-600 text-white rounded-md ${isSending || isSuccess || !hasCaptcha ? '' : 'hover:bg-indigo-700'} focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2`}
+              disabled={isSending || feedbackMessage !== '' || isSuccess || !hasCaptcha ? true : false}
             >
               ✉️ Send
             </button>
