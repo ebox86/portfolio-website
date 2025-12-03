@@ -2,9 +2,6 @@ name: Update Cloud Run Env Vars
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - fix/page-transition-fix
 
 jobs:
   update-env:
