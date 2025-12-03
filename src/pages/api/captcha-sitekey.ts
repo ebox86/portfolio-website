@@ -9,8 +9,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const siteKey = process.env.NEXT_PUBLIC_CAPTCHA_KEY;
 
   if (!siteKey) {
-    return res.status(503).json({ message: 'Captcha not configured' });
+    // Return 200 with a disabled flag so the client can gracefully disable the form without logging a network error.
+    return res.status(200).json({ siteKey: null, disabled: true });
   }
 
-  return res.status(200).json({ siteKey });
+  return res.status(200).json({ siteKey, disabled: false });
 }
