@@ -90,8 +90,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setTimeout(() => setConfettiPieces([]), 2200);
   };
 
-  const spinStyle = {
-    ['--spin-offset' as React.CSSProperties['fontFamily']]: spinOffset,
+  const spinStyle: React.CSSProperties = {
+    ['--spin-offset' as any]: spinOffset,
   };
 
   const toggleTheme = () => {
@@ -179,11 +179,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         left: `${piece.left}%`,
                         animationDelay: `${piece.delay}ms`,
                         animationDuration: `${piece.duration}ms`,
-                        ['--duration' as React.CSSProperties['fontFamily']]: `${piece.duration}ms`,
+                        ['--duration' as any]: `${piece.duration}ms`,
                         backgroundColor: piece.color,
-                        ['--drift' as React.CSSProperties['fontFamily']]: `${piece.drift}px`,
-                        ['--start-y' as React.CSSProperties['fontFamily']]: piece.startY,
-                        ['--rot' as React.CSSProperties['fontFamily']]: piece.rotation,
+                        ['--drift' as any]: `${piece.drift}px`,
+                        ['--start-y' as any]: piece.startY,
+                        ['--rot' as any]: piece.rotation,
                       }}
                     />
                   ))}

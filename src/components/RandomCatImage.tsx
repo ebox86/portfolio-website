@@ -1,5 +1,5 @@
 import React from 'react';
-import Image from "next/legacy/image";
+import Image from 'next/image';
 import Link from 'next/link';
 
 interface RandomCatImageProps {
@@ -14,11 +14,15 @@ const RandomCatImage: React.FC<RandomCatImageProps> = ({ currentImage, imageWidt
     <div className="mb-4 relative">
       {!currentImage ? (
         <div className="relative rounded-xl p-[3px] bg-gradient-to-br from-orange-500 via-pink-500 to-purple-700 overflow-hidden">
-          <div className="rounded-[10px] overflow-hidden bg-white">
-            <img
+          <div className="relative h-64 rounded-[10px] overflow-hidden bg-white">
+            <Image
               src="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif"
               alt="Loading cat"
-              className="w-full h-64 object-cover"
+              fill
+              className="object-cover"
+              priority
+              unoptimized
+              sizes="(max-width: 768px) 90vw, 400px"
             />
           </div>
         </div>
@@ -31,9 +35,9 @@ const RandomCatImage: React.FC<RandomCatImageProps> = ({ currentImage, imageWidt
                 alt="Random Cat"
                 width={imageWidth || 500}
                 height={imageHeight || 500}
-                priority={true}
-                layout='responsive'
-                className="rounded-lg shadow-md"
+                priority
+                className="h-auto w-full rounded-lg shadow-md"
+                sizes="(max-width: 768px) 90vw, 500px"
               />
             </div>
           </div>
@@ -42,7 +46,17 @@ const RandomCatImage: React.FC<RandomCatImageProps> = ({ currentImage, imageWidt
             Cat pics provided by https://thecatapi.com/
           </div>
           {/* Preloading the next image */}
-          {nextImage && <img src={nextImage} alt="Preload Next Cat" width="0" height="0" />}
+          {nextImage && (
+            <Image
+              src={nextImage}
+              alt="Preload Next Cat"
+              width={10}
+              height={10}
+              priority
+              className="pointer-events-none opacity-0 absolute"
+              sizes="10px"
+            />
+          )}
         </>
       )}
     </div>

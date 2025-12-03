@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
@@ -7,9 +8,9 @@ const Footer: React.FC = () => {
       <div className="flex justify-between items-center flex-col md:flex-row">
         <p className="text-xs text-gray-200 text-center md:text-left">&copy; {year} Evan Kohout. Made with ❤️. All rights reserved.</p>
         <div className="flex items-center space-x-2 text-xs text-gray-300 mt-3 md:mt-0">
-          <a href="/privacy" className="hover:text-white transition">Privacy</a>
+          <Link href="/privacy" className="hover:text-white transition">Privacy</Link>
           <span className="text-gray-500">|</span>
-          <a href="/terms" className="hover:text-white transition">Terms</a>
+          <Link href="/terms" className="hover:text-white transition">Terms</Link>
         </div>
       </div>
     </footer>
