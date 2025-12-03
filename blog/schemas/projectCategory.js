@@ -1,0 +1,66 @@
+export default {
+  name: 'projectCategory',
+  title: 'Project Category',
+  type: 'document',
+  fields: [
+    {
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      validation: (Rule) => Rule.required(),
+    },
+    {
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      options: { source: 'title', maxLength: 96 },
+      validation: (Rule) => Rule.required(),
+    },
+    {
+      name: 'description',
+      title: 'Description',
+      type: 'text',
+      rows: 3,
+    },
+    {
+      name: 'order',
+      title: 'Order',
+      type: 'number',
+      description: 'Use to sort categories.',
+    },
+    {
+      name: 'emoji',
+      title: 'Emoji/Icon',
+      type: 'string',
+      description: 'Pick an emoji or paste a short icon text to represent the category.',
+      options: {
+        list: [
+          {title: 'Default', value: '📂'},
+          {title: 'Just for fun', value: '🎉'},
+          {title: 'Design & graphics', value: '🎨'},
+          {title: 'Finance & crypto', value: '💰'},
+          {title: 'IaC & DevOps', value: '⚙️'},
+          {title: 'Star', value: '⭐'},
+          {title: 'Rocket', value: '🚀'},
+          {title: 'Laptop', value: '💻'},
+        ],
+        layout: 'dropdown',
+      },
+      validation: (Rule) => Rule.max(4),
+    },
+    {
+      name: 'gradientStart',
+      title: 'Gradient Start Color',
+      type: 'color',
+      description: 'Pick the start color for the gradient.',
+      options: { disableAlpha: true },
+    },
+    {
+      name: 'gradientEnd',
+      title: 'Gradient End Color',
+      type: 'color',
+      description: 'Pick the end color for the gradient.',
+      options: { disableAlpha: true },
+    },
+  ],
+}

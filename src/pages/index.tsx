@@ -17,6 +17,20 @@ interface BlogPost {
 
 interface HomePageProps {
   initialData: BlogPost[];
+  hero: {
+    heroTitle?: string;
+    heroSubtitle?: string;
+    pronouns?: string;
+    location?: string;
+    headshot?: {
+      asset?: {
+        url?: string;
+        metadata?: {
+          lqip?: string;
+        };
+      };
+    };
+  } | null;
 }
 
 type CatImageData = {
@@ -28,13 +42,20 @@ type CatImageData = {
 
 const fetcher = (query: string) => client.fetch<BlogPost[]>(query);
 
-const Home: React.FC<HomePageProps> = ({ initialData }) => {
+const Home: React.FC<HomePageProps> = ({ initialData, hero }) => {
   const router = useRouter();
   const [formattedDates, setFormattedDates] = useState<string[]>([]);
   const [currentImage, setCurrentImage] = useState<CatImageData | null>(null);
   const [nextImage, setNextImage] = useState<CatImageData | null>(null);
   const [votingButtonsActive, setVotingButtonsActive] = useState(true);
   const [fallbackImage, setFallbackImage] = useState<string | null>(null);
+
+  const headshotSrc = hero?.headshot?.asset?.url || '/images/headshot.png';
+  const headshotBlur = hero?.headshot?.asset?.metadata?.lqip;
+  const heroTitle = hero?.heroTitle || "👋 Hey, I'm Evan";
+  const heroSubtitle = hero?.heroSubtitle || 'Engineer. Traveler. Thinker. Creator.';
+  const pronouns = hero?.pronouns || 'He/him';
+  const location = hero?.location || 'Seattle, WA';
 
   const query = `*[_type == "post"] | order(publishedAt desc) [0..2] {
     _id,
@@ -142,37 +163,37 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
   };
   
   return (
-      <div className="container mx-auto max-w-screen-md">
+      <div className="w-full">
         <div>
           <div className="pt-6 pb-2 w-full md:w-4/6 md:float-left relative text-center md:text-left">
-          <h1 className="text-5xl font-bold text-gray-800 mb-2">👋 Hey, I&apos;m Evan</h1>
-          <p className="text-gray-700 py-1 text-xl">
-            Engineer. Traveler. Thinker. Creator.
+          <h1 className="text-5xl font-bold text-gray-800 dark:text-white mb-2">{heroTitle}</h1>
+          <p className="text-gray-700 dark:text-gray-200 py-1 text-xl">
+            {heroSubtitle}
           </p>
           <p className="py-1">
-            💁🏻‍♂️ He/him   📍 Seattle, WA
+            💁🏻‍♂️ {pronouns}   📍 {location}
           </p>
           <div className="flex flex-col md:flex-row md:items-center">
             <button 
               onClick={() => router.push('/me')}
-              className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 m-2 md:text-left text-center inline-block"
+              className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 m-2 md:text-left text-center inline-block transform transition duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-xl"
             >
               ☕ Get to know me
             </button>
             <button 
               onClick={() => router.push('/contact')}
-              className="m-2 md:text-left text-center py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+              className="m-2 md:text-left text-center py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 transform transition duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-xl"
             >
               📞 Get in touch
             </button>
           </div>
           <br />
-          <p className="text-gray-700">
+          <p className="text-gray-700 dark:text-gray-200">
             Here&apos;s a cat 👇
           </p>
         </div>
         <div className="w-full md:w-2/6 md:float-left p-4 hidden md:block">
-          <Avatar src={`/images/headshot.png`} />
+          <Avatar src={headshotSrc} blurDataURL={headshotBlur} />
         </div>
       </div>
       <div className="w-full md:w-4/5 md:float-left relative">
@@ -209,7 +230,7 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
       </div>
       <div className="w-full md:w-1/5 md:float-left">
         <div className="p-4 hidden md:block">
-          <h2 className="text-md font-semibold text-gray-800 mb-4">Recent Posts</h2>
+          <h2 className="text-md font-semibold text-gray-800 dark:text-white mb-4">Recent Posts</h2>
           <ul className="space-y-4">
             {initialData.map(({ _id, title = '', slug = '' }, index) => (
               <li key={_id}>
@@ -229,18 +250,36 @@ const Home: React.FC<HomePageProps> = ({ initialData }) => {
 };
 
 export const getStaticProps: GetStaticProps<HomePageProps> = async () => {
-  const query = `*[_type == "post"] | order(publishedAt desc) [0..2] {
+  const postsQuery = `*[_type == "post"] | order(publishedAt desc) [0..2] {
     _id,
     title,
     slug,
     publishedAt
   }`;
+  const heroQuery = `*[_type == "homeSettings"][0]{
+    heroTitle,
+    heroSubtitle,
+    pronouns,
+    location,
+    headshot{
+      asset->{
+        url,
+        metadata{
+          lqip
+        }
+      }
+    }
+  }`;
 
-  const recentPosts = await client.fetch<BlogPost[]>(query);
+  const [recentPosts, hero] = await Promise.all([
+    client.fetch<BlogPost[]>(postsQuery),
+    client.fetch(heroQuery),
+  ]);
 
   return {
     props: {
       initialData: recentPosts,
+      hero: hero || null,
     },
     revalidate: 600 // 10 min
   };
