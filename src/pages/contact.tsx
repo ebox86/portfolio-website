@@ -4,9 +4,7 @@ import { RiTwitterXFill, RiCloseLine } from 'react-icons/ri';
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 const ContactPage = () => {
-  const captchaSiteKey = process.env.NEXT_PUBLIC_CAPTCHA_KEY || '';
-  const hasCaptcha = Boolean(captchaSiteKey);
-
+  const [captchaSiteKey, setCaptchaSiteKey] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [userMessage, setUserMessage] = useState('');
@@ -14,6 +12,7 @@ const ContactPage = () => {
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const hasCaptcha = Boolean(captchaSiteKey);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -25,6 +24,30 @@ const ContactPage = () => {
     }
     return () => clearTimeout(timer);
   }, [feedbackMessage]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchCaptchaKey = async () => {
+      try {
+        const res = await fetch('/api/captcha-sitekey');
+        if (!res.ok) {
+          return;
+        }
+        const data = await res.json();
+        if (!cancelled && data?.siteKey) {
+          setCaptchaSiteKey(data.siteKey);
+        }
+      } catch (error) {
+        // Fail silently; form will stay disabled without a captcha key.
+      }
+    };
+
+    fetchCaptchaKey();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const validateEmail = (email: string) => {
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
