@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { FaDownload } from 'react-icons/fa';
+import { FaDownload, FaLinkedin } from 'react-icons/fa';
 import { PortableText } from '@portabletext/react';
 import client from '../../sanityClient';
 
@@ -36,6 +36,7 @@ type AboutPageProps = {
   introSubheading?: string;
   bio?: any;
   resumeUrl?: string;
+  resumeUpdatedAt?: string | null;
   headerImage?: {
     url?: string;
     blurDataURL?: string;
@@ -47,7 +48,7 @@ type AboutPageProps = {
 };
 
 
-const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introSubheading, activities, resumeUrl, bio, headerImage }) => {
+const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introSubheading, activities, resumeUrl, resumeUpdatedAt, bio, headerImage }) => {
   const formatEmployment = (value?: string) => {
     if (!value) return 'Full-time';
     return value
@@ -233,15 +234,39 @@ const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introS
         )})}
       </div>
       {/* Resume */}
-      <div className="flex space-x-4 items-center">
-        <a 
-          href={resumeUrl || '/resume.pdf'}
-          download 
-          className="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center space-x-2 hover:bg-blue-700 transition"
-        >
-          <FaDownload />
-          <span>Download Resume</span>
-        </a>
+      <div className="rounded-xl border border-gray-200 bg-gray-50 p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800/60">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-6">
+          <div className="space-y-1 md:flex-1">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">Resume</h3>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              Download my resume or connect with me on LinkedIn.
+            </p>
+            {resumeUpdatedAt && (
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Last updated {new Date(resumeUpdatedAt).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col gap-2 md:items-end md:min-w-[190px]">
+            <a
+              href={resumeUrl || '/resume.pdf'}
+              download
+              className="inline-flex w-[190px] items-center justify-center gap-2 rounded-md border border-blue-600 bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-[1px] hover:shadow-md hover:bg-blue-700 dark:border-blue-500 dark:bg-blue-600 dark:text-white"
+            >
+              <FaDownload />
+              <span>Download resume</span>
+            </a>
+            <a
+              href="https://www.linkedin.com/in/evan-kohout"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex w-[190px] items-center justify-center gap-2 rounded-md border border-sky-600 bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-[1px] hover:shadow-md hover:bg-sky-700 dark:border-sky-500 dark:bg-sky-600 dark:text-white"
+            >
+              <FaLinkedin />
+              <span>View LinkedIn</span>
+            </a>
+          </div>
+        </div>
       </div>
       {/* Personal Activities */}
       <div className="space-y-6">
@@ -303,6 +328,7 @@ export async function getStaticProps() {
       introSubheading,
       bio,
       resume{asset->{url}},
+      resume{asset->{url, _updatedAt}},
       headerImage{
         asset->{url, metadata{lqip}}
       }
@@ -344,6 +370,7 @@ export async function getStaticProps() {
       introSubheading: aboutSettings?.introSubheading || null,
       bio: aboutSettings?.bio || null,
       resumeUrl: aboutSettings?.resume?.asset?.url || null,
+      resumeUpdatedAt: aboutSettings?.resume?.asset?._updatedAt || null,
       headerImage: aboutSettings?.headerImage?.asset
         ? {
             url: aboutSettings.headerImage.asset.url,

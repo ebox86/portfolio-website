@@ -40,11 +40,25 @@ export default {
       },
     },
     {
-      name: 'categories',
-      title: 'Categories',
+      name: 'category',
+      title: 'Category',
+      type: 'reference',
+      to: [{ type: 'postCategory' }],
+      description: 'High-level category for the post (post, how-to, review).',
+    },
+    {
+      name: 'tags',
+      title: 'Tags',
       type: 'array',
-      of: [{type: 'reference', to: {type: 'category'}}],
-      validation: Rule => Rule.max(3)
+      of: [
+        {
+          type: 'reference',
+          to: [{ type: 'postTag' }],
+        },
+      ],
+      options: { layout: 'tags' },
+      description: 'Pick 1–3 tags for this post.',
+      validation: (Rule) => Rule.min(1).max(3)
     },
     {
       name: 'publishedAt',
