@@ -99,7 +99,7 @@ const ProjectsPage: React.FC<ProjectsProps> = ({ categories = [], projects = [] 
       <header className="space-y-3">
         <h1 className="text-5xl font-bold text-gray-800 dark:text-white">Projects</h1>
         <p className="text-lg text-gray-700 dark:text-gray-200">
-          Curated builds, infra work, and experiments. Pick a category to drill in; below is the full list.
+          Curated builds, infra work, and experiments.
         </p>
       </header>
 
@@ -142,7 +142,11 @@ const ProjectsPage: React.FC<ProjectsProps> = ({ categories = [], projects = [] 
 
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">All projects</h3>
+          <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">
+            {activeCategory === 'all'
+              ? 'All projects'
+              : `${categoryMap[activeCategory]?.label || 'Category'} projects`}
+          </h3>
           <button
             onClick={() => setActiveCategory('all')}
             className="text-sm font-semibold px-3 py-1 rounded-full border border-gray-200 bg-white text-orange-600 hover:text-orange-700 hover:border-orange-200 hover:bg-gray-50 shadow-sm transition dark:border-gray-700 dark:bg-gray-800 dark:text-orange-300 dark:hover:text-orange-200 dark:hover:bg-gray-700"

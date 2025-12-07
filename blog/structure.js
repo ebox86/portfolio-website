@@ -70,7 +70,11 @@ export default (S) =>
               S.listItem()
                 .title('Post Categories')
                 .icon(TagIcon)
-                .child(S.documentTypeList('category').title('Post Categories')),
+                .child(S.documentTypeList('postCategory').title('Post Categories')),
+              S.listItem()
+                .title('Post Tags')
+                .icon(TagIcon)
+                .child(S.documentTypeList('postTag').title('Post Tags')),
             ])
         ),
 

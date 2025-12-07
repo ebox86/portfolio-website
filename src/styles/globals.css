@@ -406,17 +406,20 @@ pre {
 }
 
 .nav-underline:hover::after,
+.nav-underline.is-active::after,
 .nav-underline:focus-visible::after {
   transform: translateY(0) scaleX(1);
   opacity: 1;
 }
 
 .nav-underline:hover,
+.nav-underline.is-active,
 .nav-underline:focus-visible {
   color: #111827;
 }
 
 .dark .nav-underline:hover,
+.dark .nav-underline.is-active,
 .dark .nav-underline:focus-visible {
   color: #f9fafb;
 }

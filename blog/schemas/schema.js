@@ -1,5 +1,6 @@
 import blockContent from './blockContent';
-import category from './category';
+import postTag from './postTag';
+import postCategory from './postCategory';
 import post from './post';
 import author from './author';
 import homeSettings from './homeSettings';
@@ -14,7 +15,8 @@ import personalActivity from './personalActivity';
 export default [
   post,
   author,
-  category,
+  postTag,
+  postCategory,
   blockContent,
   homeSettings,
   legalPage,
