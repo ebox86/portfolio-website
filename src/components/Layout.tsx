@@ -12,6 +12,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [spinOffset, setSpinOffset] = useState<string>('0s');
   const [showBanner, setShowBanner] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'auto'>('auto');
   const [confettiPieces, setConfettiPieces] = useState<
     {
       id: number;
@@ -32,14 +33,50 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stored = window.localStorage.getItem('theme');
+      const storedMode = window.localStorage.getItem('themeMode');
+      const storedTheme = window.localStorage.getItem('theme');
       const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      const initialMode: 'light' | 'dark' | 'auto' =
+        storedMode === 'light' || storedMode === 'dark' || storedMode === 'auto'
+          ? (storedMode as 'light' | 'dark' | 'auto')
+          : storedTheme === 'light' || storedTheme === 'dark'
+          ? (storedTheme as 'light' | 'dark')
+          : 'auto';
+
       const initialTheme: 'light' | 'dark' =
-        stored === 'light' || stored === 'dark' ? (stored as 'light' | 'dark') : prefersDark ? 'dark' : 'light';
+        initialMode === 'auto' ? (prefersDark ? 'dark' : 'light') : (initialMode as 'light' | 'dark');
+
+      setThemeMode(initialMode);
       setTheme(initialTheme);
       document.documentElement.classList.toggle('dark', initialTheme === 'dark');
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (themeMode === 'auto') {
+        const nextTheme = e.matches ? 'dark' : 'light';
+        setTheme(nextTheme);
+        document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+        window.localStorage.setItem('theme', nextTheme);
+      }
+    };
+    mql.addEventListener('change', handleChange);
+    return () => mql.removeEventListener('change', handleChange);
+  }, [themeMode]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const nextTheme: 'light' | 'dark' = themeMode === 'auto' ? (prefersDark ? 'dark' : 'light') : themeMode;
+    setTheme(nextTheme);
+    document.documentElement.classList.toggle('dark', nextTheme === 'dark');
+    window.localStorage.setItem('themeMode', themeMode);
+    window.localStorage.setItem('theme', nextTheme);
+  }, [themeMode]);
 
   useEffect(() => {
     // Compute spin offset on client to avoid hydration mismatch.
@@ -94,20 +131,30 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     ['--spin-offset' as any]: spinOffset,
   };
 
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    root.classList.add('theme-fade');
+    const timer = setTimeout(() => root.classList.remove('theme-fade'), 250);
+    return () => clearTimeout(timer);
+  }, [theme]);
+
   const toggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light';
-    setTheme(next);
-    if (typeof document !== 'undefined') {
-      document.documentElement.classList.toggle('dark', next === 'dark');
-    }
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('theme', next);
-    }
+    setThemeMode((prev) => {
+      if (prev === 'light') return 'dark';
+      if (prev === 'dark') return 'auto';
+      return 'light';
+    });
   };
 
   return (
     <ThemeContext.Provider value={theme}>
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-gray-100 text-gray-900 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 dark:text-gray-100">
+      <style jsx global>{`
+        :root.theme-fade, :root.theme-fade * {
+          transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+      `}</style>
       <Head>
         <title>@ebox86</title>
         <meta name="description" content="The personal website of Evan Kohout" />
@@ -129,7 +176,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="animated-border" aria-hidden="true" />
             <div className="animated-border-glow" aria-hidden="true" />
             <div className="content-surface overflow-hidden relative dark:bg-gray-900 dark:border-gray-800">
-              <Header theme={theme} onToggleTheme={toggleTheme} />
+              <Header theme={theme} themeMode={themeMode} onToggleTheme={toggleTheme} />
               <main className="w-full max-w-[52rem] mx-auto px-6 md:px-10 pt-8 pb-16">{children}</main>
               <Footer />
               {showBanner && (
