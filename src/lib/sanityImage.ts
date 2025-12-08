@@ -13,8 +13,8 @@ export type BuiltImage = {
   url: string;
   blurDataURL?: string;
   objectPosition?: string;
-  width?: number;
-  height?: number;
+  width?: number | null;
+  height?: number | null;
 };
 
 export const buildSanityImage = (img: any, options?: BuildOptions): BuiltImage | null => {
@@ -32,8 +32,9 @@ export const buildSanityImage = (img: any, options?: BuildOptions): BuiltImage |
   if (!url) return null;
 
   const dims = img?.asset?.metadata?.dimensions;
-  const width = typeof dims?.width === 'number' ? dims.width : undefined;
-  const height = typeof dims?.height === 'number' ? dims.height : undefined;
+  // Ensure we never return undefined to keep Next.js serialization happy
+  const width = typeof dims?.width === 'number' ? dims.width : null;
+  const height = typeof dims?.height === 'number' ? dims.height : null;
 
   const hotspot = img?.hotspot;
   const objectPosition = hotspot
