@@ -1,14 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 type HeaderProps = {
   theme?: 'light' | 'dark';
+  themeMode?: 'light' | 'dark' | 'auto';
   onToggleTheme?: () => void;
 };
 
-const Header: React.FC<HeaderProps> = ({ theme = 'light', onToggleTheme }) => {
+const Header: React.FC<HeaderProps> = ({ theme = 'light', themeMode = 'light', onToggleTheme }) => {
   const router = useRouter();
+  const [showSystemIcon, setShowSystemIcon] = useState(themeMode !== 'auto');
+
+  useEffect(() => {
+    if (themeMode === 'auto') {
+      setShowSystemIcon(false);
+      const t = setTimeout(() => setShowSystemIcon(true), 1800);
+      return () => clearTimeout(t);
+    }
+    setShowSystemIcon(true);
+  }, [themeMode]);
+
   const isActive = (href: string) => {
     if (href === '/') return router.pathname === '/';
     if (href === '/blog') return router.pathname.startsWith('/blog');
@@ -55,13 +67,37 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light', onToggleTheme }) => {
             </li>
           </ul>
           {onToggleTheme && (
-            <button
-              onClick={onToggleTheme}
-              aria-label="Toggle theme"
-              className="ml-2 px-3 py-2 rounded-full bg-gray-200 text-gray-800 hover:bg-gray-300 transition dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
-            >
-              {theme === 'dark' ? '🌙' : '☀️'}
-            </button>
+            <div className="relative group ml-2 z-50">
+              <button
+                onClick={onToggleTheme}
+                aria-label="Toggle theme"
+                className="px-3 py-2 rounded-full bg-gray-200 text-gray-800 hover:bg-gray-300 transition dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700"
+              >
+                <span className="relative inline-flex h-5 w-5 items-center justify-center align-middle">
+                  <span
+                    className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
+                      themeMode === 'auto' && !showSystemIcon ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    ⚙️
+                  </span>
+                  <span
+                    className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
+                      themeMode === 'auto' && !showSystemIcon ? 'opacity-0' : 'opacity-100'
+                    }`}
+                  >
+                    {theme === 'dark' ? '☀️' : '🌙'}
+                  </span>
+                </span>
+              </button>
+              <div className="pointer-events-none absolute left-1/2 top-[110%] z-[9999] -translate-x-1/2 max-w-[220px] whitespace-normal rounded-md bg-black/90 px-3 py-1.5 text-xs leading-tight text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover:opacity-100">
+                {themeMode === 'auto'
+                  ? 'Toggle light mode'
+                  : themeMode === 'light'
+                  ? 'Toggle dark mode'
+                  : 'Toggle system default'}
+              </div>
+            </div>
           )}
         </div>
       </nav>

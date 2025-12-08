@@ -11,7 +11,7 @@ interface RandomCatImageProps {
 
 const RandomCatImage: React.FC<RandomCatImageProps> = ({ currentImage, imageWidth, imageHeight, nextImage }) => {
   return (
-    <div className="mb-4 relative">
+    <div className="mb-4 relative max-w-[480px] md:max-w-[480px] mr-auto">
       {!currentImage ? (
         <div className="relative rounded-xl p-[3px] bg-gradient-to-br from-orange-500 via-pink-500 to-purple-700 overflow-hidden">
           <div className="relative h-64 rounded-[10px] overflow-hidden bg-white">
@@ -33,11 +33,11 @@ const RandomCatImage: React.FC<RandomCatImageProps> = ({ currentImage, imageWidt
               <Image
                 src={currentImage}
                 alt="Random Cat"
-                width={imageWidth || 500}
-                height={imageHeight || 500}
+                width={imageWidth || 480}
+                height={imageHeight || 480}
                 priority
                 className="h-auto w-full rounded-lg shadow-md"
-                sizes="(max-width: 768px) 90vw, 500px"
+                sizes="(max-width: 768px) 90vw, 480px"
               />
             </div>
           </div>
