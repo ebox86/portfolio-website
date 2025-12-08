@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light', onToggleTheme }) => {
           <div className="text-5xl md:text-6xl font-bold text-center md:text-left cursor-pointer">
             <div className="text-3xl relative logo-trace-wrapper">
               <svg
-                className="logo-trace-svg"
+                className="logo-trace-svg translate-y-[15px]"
                 viewBox="0 0 220 90"
                 aria-hidden="true"
                 focusable="false"

@@ -1,10 +1,30 @@
-import React, { useState, useEffect, useMemo, useContext } from 'react';
-import { FaLinkedin, FaGithub } from 'react-icons/fa';
-import { RiTwitterXFill, RiCloseLine } from 'react-icons/ri';
+import React, { useState, useEffect, useMemo, useContext, useRef } from 'react';
+import { GetStaticProps } from 'next';
+import client from '../../sanityClient';
+import { FaLinkedin, FaGithub, FaDownload } from 'react-icons/fa';
+import { RiTwitterXFill, RiCloseLine, RiShareForwardLine, RiMailLine } from 'react-icons/ri';
+import { FiClipboard, FiLink } from 'react-icons/fi';
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import ThemeContext from '../context/ThemeContext';
 
-const ContactPage = () => {
+type ContactLink = {
+  label?: string;
+  url?: string;
+  icon?: string;
+  linkType?: 'social' | 'resume' | 'share';
+  shareSubject?: string;
+  shareBody?: string;
+  resumeFileUrl?: string | null;
+  tooltip?: string;
+  resumeUpdatedAt?: string | null;
+};
+
+type ContactPageProps = {
+  contactSubheading?: string | null;
+  contactLinks: ContactLink[];
+};
+
+const ContactPage: React.FC<ContactPageProps> = ({ contactSubheading, contactLinks }) => {
   const [captchaSiteKey, setCaptchaSiteKey] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -13,6 +33,11 @@ const ContactPage = () => {
   const [isSending, setIsSending] = useState(false);
   const [isSuccess, setIsSuccess] = useState<boolean | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaReady, setCaptchaReady] = useState(false);
+  const [shareMenuOpen, setShareMenuOpen] = useState(false);
+  const [shareStatus, setShareStatus] = useState('');
+  const [siteUrl, setSiteUrl] = useState('https://ebox86.com');
+  const shareMenuRef = useRef<HTMLDivElement | null>(null);
   const [flashTargets, setFlashTargets] = useState({
     name: false,
     email: false,
@@ -21,6 +46,96 @@ const ContactPage = () => {
   const hasCaptcha = Boolean(captchaSiteKey);
   const theme = useContext(ThemeContext);
   const isDark = theme === 'dark';
+  const fallbackLinks: ContactLink[] = [
+    {
+      label: 'Connect on LinkedIn',
+      url: 'https://www.linkedin.com/in/evan-kohout/',
+      icon: 'linkedin',
+      linkType: 'social',
+      tooltip: 'Connect on LinkedIn',
+    },
+    {
+      label: 'Follow on X',
+      url: 'https://twitter.com/ebox86',
+      icon: 'x',
+      linkType: 'social',
+      tooltip: 'Follow on X',
+    },
+    {
+      label: 'View GitHub',
+      url: 'https://github.com/ebox86',
+      icon: 'github',
+      linkType: 'social',
+      tooltip: 'View GitHub',
+    },
+    {
+      label: 'Download Resume',
+      url: '/resume.pdf',
+      icon: 'resume',
+      linkType: 'resume',
+      tooltip: 'Download Resume',
+    },
+    {
+      label: 'Share this site',
+      icon: 'share',
+      linkType: 'share',
+      shareSubject: 'Take a look at this portfolio',
+      shareBody: 'Thought you might like this portfolio:',
+      tooltip: 'Share this site',
+    },
+  ];
+
+  const normalizedLinks: ContactLink[] = (contactLinks || []).map((link) => ({
+    ...link,
+    linkType: (link.linkType as ContactLink['linkType']) || 'social',
+    tooltip: link.tooltip ?? link.label ?? '',
+  }));
+
+  const shareLink = normalizedLinks.find((link) => link.linkType === 'share');
+  const shareMailSubject = shareLink?.shareSubject || 'Take a look at this portfolio';
+  const shareMailBody = shareLink?.shareBody || 'Thought you might like this portfolio:';
+  const resumeLink = normalizedLinks.find((link) => link.linkType === 'resume');
+  const displayLinks = normalizedLinks;
+  const mailBodyWithUrl = `${shareMailBody || ''}${shareMailBody?.endsWith('\n') ? '' : '\n\n'}${siteUrl}`;
+
+  const renderIcon = (iconKey?: string, size = 40) => {
+    const key = iconKey?.toLowerCase();
+    switch (key) {
+      case 'linkedin':
+        return <FaLinkedin size={size} />;
+      case 'x':
+      case 'twitter':
+        return <RiTwitterXFill size={size} />;
+      case 'github':
+        return <FaGithub size={size} />;
+      case 'resume':
+      case 'download':
+        return <FaDownload size={size} />;
+      case 'share':
+        return <RiShareForwardLine size={size - 4} />;
+      case 'mail':
+        return <RiMailLine size={size - 6} />;
+      case 'copy':
+        return <FiClipboard size={size - 8} />;
+      case 'link':
+        return <FiLink size={size - 6} />;
+      default:
+        return <RiShareForwardLine size={size - 4} />;
+    }
+  };
+
+  const formatResumeUpdated = (iso?: string | null) => {
+    if (!iso) return '';
+    const date = new Date(iso);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -60,6 +175,40 @@ const ContactPage = () => {
   const validateEmail = (email: string) => {
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     return emailPattern.test(email);
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setSiteUrl(window.location.href);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!shareStatus) return;
+    const timer = setTimeout(() => setShareStatus(''), 2000);
+    return () => clearTimeout(timer);
+  }, [shareStatus]);
+
+  useEffect(() => {
+    if (!shareMenuOpen) return;
+    const handleClickAway = (event: MouseEvent) => {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target as Node)) {
+        setShareMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickAway);
+    return () => document.removeEventListener('mousedown', handleClickAway);
+  }, [shareMenuOpen]);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(siteUrl);
+      setShareStatus('Link copied!');
+    } catch {
+      setShareStatus('Could not copy, try again.');
+    } finally {
+      setShareMenuOpen(false);
+    }
   };
 
   const onCaptchaChange = (token: any) => {
@@ -165,6 +314,11 @@ const ContactPage = () => {
       {/* Contact Form Column */}
       <div className="md:flex-1 relative">
         <h1 className="text-5xl font-bold text-gray-800 dark:text-white mb-4">Let&apos;s Connect</h1>
+        {contactSubheading && (
+          <p className="text-lg text-gray-700 dark:text-gray-200 mb-6">
+            {contactSubheading}
+          </p>
+        )}
         <form onSubmit={handleSubmit}>
           {/* Name Field */}
           <div className="mb-4">
@@ -228,18 +382,23 @@ const ContactPage = () => {
                 </span>
               </p>
           </div>
-          <div className="flex justify-center items-center rounded-md">
-            {hasCaptcha ? (
-              <HCaptcha
-                sitekey={captchaSiteKey}
-                onVerify={onCaptchaChange}
-                theme={isDark ? 'dark' : 'light'}
-              />
-            ) : (
-              <div className="text-sm text-red-700 bg-red-100 border border-red-300 px-3 py-2 rounded">
-                Captcha key missing; contact form disabled in this environment.
-              </div>
-            )}
+          <div className="flex justify-center">
+            <div className="relative w-full max-w-md min-h-[110px] flex items-center justify-center rounded-md border border-transparent dark:border-transparent">
+              {hasCaptcha ? (
+                <div className={`${captchaReady ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`}>
+                  <HCaptcha
+                    sitekey={captchaSiteKey}
+                    onVerify={onCaptchaChange}
+                    onLoad={() => setCaptchaReady(true)}
+                    theme={isDark ? 'dark' : 'light'}
+                  />
+                </div>
+              ) : (
+                <div className="text-sm text-red-700 bg-red-100 border border-red-300 px-3 py-2 rounded">
+                  Captcha key missing; contact form disabled in this environment.
+                </div>
+              )}
+            </div>
           </div>
           <div className="text-center m-4">
             <div
@@ -286,21 +445,158 @@ const ContactPage = () => {
       {/* Social Links Column */}
       <div className="md:w-24 p-4 bg-gray-50 border border-gray-200 rounded-xl flex flex-col justify-center items-center dark:bg-gray-800 dark:border-gray-700">
         <div className="social-media-section">
-          <div className="social-icons flex flex-row md:flex-col">
-            <a href="https://www.linkedin.com/in/evan-kohout/" className="text-4xl text-blue-600 hover:text-blue-800 dark:text-white dark:hover:text-gray-200 p-4 transform transition duration-200 hover:scale-110 hover:shadow-lg rounded-full">
-              <FaLinkedin size={40} />
-            </a>
-            <a href="https://twitter.com/ebox86" className="text-4xl text-gray-800 hover:text-gray-500 dark:text-white dark:hover:text-gray-200 p-4 transform transition duration-200 hover:scale-110 hover:shadow-lg rounded-full">
-              <RiTwitterXFill size={40} />
-            </a>
-            <a href="https://github.com/ebox86" className="text-4xl text-gray-800 hover:text-gray-600 dark:text-white dark:hover:text-gray-200 p-4 transform transition duration-200 hover:scale-110 hover:shadow-lg rounded-full">
-              <FaGithub size={40} />
-            </a>
+          <div className="social-icons flex flex-row md:flex-col items-center">
+            {displayLinks.map((link, idx) => {
+              const tooltipLabel = link.tooltip || '';
+              if (link.linkType === 'share') {
+                return (
+                  <div
+                    key={`share-${idx}`}
+                    className="relative group flex flex-col items-center"
+                    ref={shareMenuRef}
+                    onMouseLeave={() => setShareMenuOpen(false)}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setShareMenuOpen((open) => !open)}
+                      className="flex items-center justify-center text-4xl text-gray-800 hover:text-gray-600 dark:text-white dark:hover:text-gray-200 p-4 transform transition duration-200 hover:scale-110 hover:shadow-lg rounded-full leading-none hover:bg-indigo-50 dark:hover:bg-gray-700"
+                      aria-label={link.label || tooltipLabel || 'Share this site'}
+                    >
+                      {renderIcon(link.icon || 'share', 36)}
+                    </button>
+                    {tooltipLabel && (
+                      <span
+                        className={`pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full -mb-3 w-max max-w-[160px] rounded-md bg-yellow-50 border-2 border-black px-3 py-2 text-base font-semibold text-gray-900 shadow-xl hidden md:block md:opacity-0 md:group-hover:opacity-100 transition ${shareMenuOpen ? 'md:hidden' : ''}`}
+                      >
+                        {tooltipLabel}
+                      </span>
+                    )}
+                    {shareMenuOpen && (
+                      <div className="absolute bottom-full mb-0 left-1/2 -translate-x-1/2 w-52 rounded-lg border border-gray-200 bg-white shadow-lg dark:bg-gray-800 dark:border-gray-700">
+                        <button
+                          type="button"
+                          onClick={handleCopyLink}
+                          className="w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700 rounded-t-lg flex items-center gap-2"
+                        >
+                          <FiClipboard size={16} />
+                          Copy site link
+                        </button>
+                        <a
+                          href={`mailto:?subject=${encodeURIComponent(shareMailSubject)}&body=${encodeURIComponent(mailBodyWithUrl)}`}
+                          className="block px-4 py-3 text-sm hover:bg-indigo-50 dark:hover:bg-gray-700 rounded-b-lg flex items-center gap-2"
+                          onClick={() => setShareMenuOpen(false)}
+                        >
+                          <RiMailLine size={16} />
+                          Email this page
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              if (link.linkType === 'resume') {
+                const resumeUrl = link.resumeFileUrl || link.url || '/resume.pdf';
+                return (
+                  <div key={`resume-${idx}`} className="relative group flex flex-col items-center">
+                    <a
+                      href={resumeUrl}
+                      download
+                      className="flex items-center justify-center text-4xl text-gray-800 hover:text-gray-600 dark:text-white dark:hover:text-gray-200 p-4 transform transition duration-200 hover:scale-110 hover:shadow-lg rounded-full leading-none hover:bg-indigo-50 dark:hover:bg-gray-700"
+                      aria-label={link.label || tooltipLabel || 'Download resume'}
+                    >
+                      {renderIcon(link.icon || 'resume', 40)}
+                    </a>
+                    {tooltipLabel && (
+                      <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full -mb-3 w-max max-w-[200px] rounded-md bg-yellow-50 border-2 border-black px-3 py-2 text-base font-semibold text-gray-900 shadow-xl opacity-0 transition hidden md:block md:group-hover:opacity-100">
+                        <span className="block">{tooltipLabel}</span>
+                        {formatResumeUpdated(link.resumeUpdatedAt) && (
+                          <span className="block text-xs text-gray-700 mt-0.5">
+                            Updated: {formatResumeUpdated(link.resumeUpdatedAt)}
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
+                <div key={`social-${idx}`} className="relative group flex flex-col items-center">
+                  <a
+                    href={link.url || '#'}
+                    className="flex items-center justify-center text-4xl text-gray-800 hover:text-gray-600 dark:text-white dark:hover:text-gray-200 p-4 transform transition duration-200 hover:scale-110 hover:shadow-lg rounded-full leading-none hover:bg-indigo-50 dark:hover:bg-gray-700"
+                    aria-label={link.label || tooltipLabel || 'Social link'}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {renderIcon(link.icon || 'link', 40)}
+                  </a>
+                  {tooltipLabel && (
+                    <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full -mb-3 w-max max-w-[160px] rounded-md bg-yellow-50 border-2 border-black px-3 py-2 text-base font-semibold text-gray-900 shadow-xl opacity-0 transition hidden md:block md:group-hover:opacity-100">
+                      {tooltipLabel}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
+      {shareStatus && (
+        <div className="fixed bottom-6 right-6 z-50 rounded-lg bg-gray-900 text-white px-4 py-3 shadow-2xl flex items-center gap-2 text-sm">
+          <FiClipboard size={16} />
+          {shareStatus}
+        </div>
+      )}
     </div>
   );
+};
+
+export const getStaticProps: GetStaticProps<ContactPageProps> = async () => {
+  try {
+    const data = await client.fetch(
+      `*[_type == "contactSettings"][0]{
+        subheading,
+        socialLinks[]{
+          label,
+          tooltip,
+          url,
+          icon,
+          linkType,
+          shareSubject,
+          shareBody,
+          resumeFile{
+            asset->{url,_updatedAt,_createdAt}
+          }
+        }
+      }`
+    );
+
+    const links: ContactLink[] =
+      data?.socialLinks?.map((link: any) => ({
+        ...link,
+        resumeFileUrl: link?.resumeFile?.asset?.url || null,
+        tooltip: link?.tooltip ?? '',
+        resumeUpdatedAt: link?.resumeFile?.asset?._updatedAt || link?.resumeFile?.asset?._createdAt || null,
+      })) || [];
+
+    return {
+      props: {
+        contactSubheading: data?.subheading || null,
+        contactLinks: links,
+      },
+      revalidate: 3600,
+    };
+  } catch (error) {
+    return {
+      props: {
+        contactSubheading: null,
+        contactLinks: [],
+      },
+      revalidate: 3600,
+    };
+  }
 };
 
 export default ContactPage;

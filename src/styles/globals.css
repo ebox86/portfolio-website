@@ -505,6 +505,7 @@ pre {
   position: relative;
   height: 100%;
   perspective: 1200px;
+  cursor: default;
 }
 
 .activity-layer {
@@ -513,18 +514,27 @@ pre {
   border-radius: 22px;
   z-index: 1;
   transition: transform 320ms ease, opacity 320ms ease, box-shadow 320ms ease;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: none;
+  --current-transform: var(--base-transform, none);
+  transform: var(--current-transform);
+  will-change: transform;
 }
 
 .activity-layer.layer-one {
   background: linear-gradient(135deg, #e0f2fe, #fef9c3);
-  transform: rotate(-2deg) translate(-8px, 10px);
+  --base-transform: rotate(-2deg) translate(-8px, 10px);
 }
 
 .activity-layer.layer-two {
   background: linear-gradient(135deg, #ede9fe, #cffafe);
-  transform: rotate(3deg) translate(12px, -8px);
+  --base-transform: rotate(3deg) translate(12px, -8px);
   opacity: 0.9;
+}
+
+.activity-stack.shuffling .activity-layer {
+  animation: stack-shuffle 520ms ease;
+  animation-fill-mode: both;
+  animation-delay: var(--shuffle-delay, 0ms);
 }
 
 .activity-photo {
@@ -535,7 +545,7 @@ pre {
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: #ffffff;
   z-index: 10;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.14);
+  box-shadow: none;
   transition: transform 320ms ease, box-shadow 320ms ease;
 }
 
@@ -572,17 +582,23 @@ pre {
 
 .activity-stack:hover .activity-photo {
   transform: translateY(-6px) rotate(0deg) scale(1.02);
-  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.16);
+  box-shadow: none;
+}
+
+.activity-stack.shuffling .activity-photo {
+  animation: photo-swap 520ms ease;
+  animation-fill-mode: both;
+  transform-origin: center center;
 }
 
 .activity-stack:hover .activity-layer.layer-one {
-  transform: rotate(-8deg) translate(-18px, 16px);
+  --current-transform: rotate(-8deg) translate(-18px, 16px);
 }
 
 .activity-stack:hover .activity-layer.layer-two {
-  transform: rotate(10deg) translate(20px, -16px);
+  --current-transform: rotate(10deg) translate(20px, -16px);
   opacity: 1;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.12);
+  box-shadow: none;
 }
 
 .activity-stack:hover .activity-tape {
@@ -592,7 +608,38 @@ pre {
 
 .activity-stack:hover .activity-label {
   transform: translateY(-2px) rotate(-1deg);
-  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.14);
+  box-shadow: none;
+}
+
+@keyframes stack-shuffle {
+  0% {
+    transform: var(--current-transform);
+  }
+  45% {
+    transform: var(--current-transform) translate3d(0, -10px, 0) scale(1.02) rotate(-1deg);
+  }
+  100% {
+    transform: var(--current-transform);
+  }
+}
+
+@keyframes photo-swap {
+  0% {
+    transform: rotate(-2deg) translateZ(0) scale(1);
+    opacity: 1;
+  }
+  30% {
+    transform: rotate(-6deg) translate(-10px, -14px) scale(1.04);
+    opacity: 0.45;
+  }
+  55% {
+    transform: rotate(4deg) translate(12px, 10px) scale(1.03);
+    opacity: 0.85;
+  }
+  100% {
+    transform: rotate(-2deg) translateZ(0) scale(1);
+    opacity: 1;
+  }
 }
 
 /* Prevent horizontal jiggle when pages differ in height (forces scrollbar space) */

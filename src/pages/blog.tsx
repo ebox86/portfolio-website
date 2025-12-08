@@ -4,10 +4,8 @@ import Image from 'next/image';
 import useSWRInfinite from 'swr/infinite';
 import { GetStaticProps } from 'next';
 import client from '../../sanityClient';
-import imageUrlBuilder from '@sanity/image-url';
+import { buildSanityImage } from '../lib/sanityImage';
 import { toPlainText } from '@portabletext/react';
-
-const builder = imageUrlBuilder(client);
 
 interface PostTag {
   _id: string;
@@ -56,17 +54,17 @@ const fetchPostsPage = async (start: number, limit: number) => {
     slug,
     body,
     publishedAt,
-    mainImage,
+    mainImage{
+      asset->{_ref, url, metadata{lqip}},
+      crop,
+      hotspot
+    },
     tags[] -> {title, _id, "slug": slug.current},
     category -> {title, _id}
   }`;
 
   return await client.fetch<BlogPost[]>(query);
 };
-
-function urlFor(source: any) {
-  return builder.image(source);
-}
 
 const BlogPage: React.FC<BlogPageProps> = ({ initialPage, tagsList = [], categoriesList = [] }) => {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
@@ -258,19 +256,23 @@ const BlogPage: React.FC<BlogPageProps> = ({ initialPage, tagsList = [], categor
         <div className="rounded-2xl border border-gray-200 bg-white/70 p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900/60">
           <ul className="space-y-4">
             {filteredPosts.length > 0 ? (
-              filteredPosts.map(({ _id, title = '', slug = '', mainImage = '', tags, body, publishedAt, category }) =>
-                slug && (
+              filteredPosts.map(({ _id, title = '', slug = '', mainImage = '', tags, body, publishedAt, category }) => {
+                const cover = buildSanityImage(mainImage, { width: 640, height: 400 });
+                if (!slug) return null;
+
+                return (
                   <Link key={_id} href={`/blog/${encodeURIComponent(slug.current)}`}>
                     <li className="bg-white border border-gray-200 my-2 rounded-lg shadow-sm transition duration-300 hover:shadow-md cursor-pointer dark:bg-gray-800/80 dark:border-gray-700">
                       <div className="flex">
                         <div className="relative w-4/12">
                           <Image
-                            src={urlFor(mainImage).width(320).quality(55).url() || ''}
+                            src={cover?.url || ''}
                             alt={title}
                             fill
-                            placeholder="blur"
-                            blurDataURL={urlFor(mainImage).width(12).quality(20).url() || ''}
+                            placeholder={cover?.blurDataURL ? 'blur' : undefined}
+                            blurDataURL={cover?.blurDataURL}
                             className="rounded-l-lg object-cover"
+                            style={cover?.objectPosition ? { objectPosition: cover.objectPosition } : undefined}
                             sizes="(max-width: 768px) 100vw, 33vw"
                           />
                         </div>
@@ -304,8 +306,8 @@ const BlogPage: React.FC<BlogPageProps> = ({ initialPage, tagsList = [], categor
                       </div>
                     </li>
                   </Link>
-                )
-              )
+                );
+              })
             ) : (
               <div className="text-sm text-gray-600 dark:text-gray-300">No posts match this tag yet.</div>
             )}

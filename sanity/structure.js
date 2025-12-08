@@ -1,4 +1,4 @@
-import {HomeIcon, DocumentTextIcon, DocumentIcon, ComposeIcon, TagIcon, UserIcon} from '@sanity/icons'
+import {HomeIcon, DocumentTextIcon, DocumentIcon, ComposeIcon, TagIcon, UserIcon, CaseIcon} from '@sanity/icons'
 
 export default (S) =>
   S.list()
@@ -54,13 +54,13 @@ export default (S) =>
             ])
         ),
 
-      // Posts with categories nested
+      // Blog (posts) with categories nested
       S.listItem()
-        .title('Posts')
+        .title('Blog')
         .icon(ComposeIcon)
         .child(
           S.list()
-            .title('Posts')
+            .title('Blog')
             .items([
               S.listItem()
                 .title('All Posts')
@@ -81,13 +81,14 @@ export default (S) =>
       // Projects with categories nested
       S.listItem()
         .title('Projects')
-        .icon(DocumentIcon)
+        .icon(CaseIcon)
         .child(
           S.list()
             .title('Projects')
             .items([
               S.listItem()
                 .title('All Projects')
+                .icon(CaseIcon)
                 .schemaType('project')
                 .child(S.documentTypeList('project').title('All Projects')),
               S.divider(),
@@ -98,6 +99,23 @@ export default (S) =>
             ])
         ),
 
+      // Contact settings
+      S.listItem()
+        .title('Contact')
+        .icon(ComposeIcon)
+        .child(
+          S.document()
+            .title('Contact Settings')
+            .schemaType('contactSettings')
+            .documentId('contactSettings')
+        ),
+
+      S.divider(),
+
       // Regular author doc list, if needed
-      S.listItem().title('Authors').schemaType('author').child(S.documentTypeList('author').title('Authors')),
+      S.listItem()
+        .title('Authors')
+        .icon(UserIcon)
+        .schemaType('author')
+        .child(S.documentTypeList('author').title('Authors')),
     ])

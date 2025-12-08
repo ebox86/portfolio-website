@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { FaDownload, FaLinkedin } from 'react-icons/fa';
 import { PortableText } from '@portabletext/react';
 import client from '../../sanityClient';
+import { buildSanityImage } from '../lib/sanityImage';
 
 type Experience = {
   startYear: number;
@@ -28,6 +29,7 @@ type ActivityPhoto = {
   imageUrl: string;
   blurDataURL?: string;
   imagePosition?: string;
+  objectPosition?: string;
 };
 
 type AboutPageProps = {
@@ -37,10 +39,12 @@ type AboutPageProps = {
   bio?: any;
   resumeUrl?: string;
   resumeUpdatedAt?: string | null;
-  headerImage?: {
+  headerImages?: {
     url?: string;
     blurDataURL?: string;
-  };
+    objectPosition?: string;
+    assetRef?: string;
+  }[];
   activities: {
     title?: string;
     photos: ActivityPhoto[];
@@ -48,7 +52,94 @@ type AboutPageProps = {
 };
 
 
-const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introSubheading, activities, resumeUrl, resumeUpdatedAt, bio, headerImage }) => {
+const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introSubheading, activities, resumeUrl, resumeUpdatedAt, bio, headerImages }) => {
+  const layerCount = 6;
+  const displayHeader = (headerImages && headerImages.length > 0 ? headerImages[0] : null) || null;
+  const stackImages = React.useMemo(() => headerImages?.filter((img) => img?.url) ?? [], [headerImages]);
+
+  const cycleImages = React.useMemo(() => {
+    if (stackImages.length > 0) return stackImages;
+    if (displayHeader) return [displayHeader];
+    return [];
+  }, [stackImages, displayHeader]);
+
+  const [layerFrame, setLayerFrame] = React.useState(0);
+  const [isShuffling, setIsShuffling] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!cycleImages.length) {
+      setLayerFrame(0);
+      return;
+    }
+
+    setLayerFrame((prev) => prev % cycleImages.length);
+  }, [cycleImages.length]);
+
+  const mainImage = React.useMemo(() => {
+    if (cycleImages.length === 0) return null;
+    return cycleImages[layerFrame % cycleImages.length];
+  }, [cycleImages, layerFrame]);
+
+  const getLayerImage = (index: number) => {
+    if (!cycleImages.length) return null;
+    if (cycleImages.length === 1) return cycleImages[0];
+    const activeLayerCount = Math.min(Math.max(cycleImages.length - 1, 1), layerCount);
+    if (index >= activeLayerCount) return null;
+    const start = (layerFrame + 1) % cycleImages.length;
+    return cycleImages[(start + index) % cycleImages.length];
+  };
+
+  const buildLayerBackground = (index: number, gradientWithImage: string, fallbackGradient?: string) => {
+    const image = getLayerImage(index);
+    if (image?.url) {
+      return {
+        background: `${gradientWithImage}, url('${image.url}')`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: image.objectPosition || 'center',
+        backgroundBlendMode: 'normal',
+      };
+    }
+
+    return {
+      background: fallbackGradient || gradientWithImage,
+    };
+  };
+
+  const withBaseTransform = (value: string): React.CSSProperties => ({
+    ['--base-transform' as any]: value,
+  });
+
+  const renderLayerImage = (index: number) => {
+    const image = getLayerImage(index);
+    if (!image?.url) return null;
+    return (
+      <Image
+        key={`${index}-${image.url}`}
+        src={image.url}
+        alt=""
+        fill
+        className="object-cover opacity-90 transition-opacity duration-700"
+        style={image.objectPosition ? { objectPosition: image.objectPosition } : undefined}
+        sizes="(max-width: 768px) 90vw, 32vw"
+        placeholder={image.blurDataURL ? 'blur' : undefined}
+        blurDataURL={image.blurDataURL}
+        aria-hidden={true}
+      />
+    );
+  };
+
+  const shuffleLayers = () => {
+    if (isShuffling || cycleImages.length === 0) return;
+
+    setIsShuffling(true);
+
+    if (cycleImages.length > 1) {
+      setLayerFrame((prev) => (prev + 1) % cycleImages.length);
+    }
+
+    setTimeout(() => setIsShuffling(false), 620);
+  };
   const formatEmployment = (value?: string) => {
     if (!value) return 'Full-time';
     return value
@@ -78,48 +169,117 @@ const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introS
 
   return (
     <div className="w-full space-y-8">
-      <header className="relative space-y-4 after:content-[''] after:block after:clear-both">
-        {headerImage?.url && (
+      <header className="relative space-y-4 after:content-[''] after:block after:clear-both pt-0 md:pt-0 -mt-4 md:-mt-4">
+        {displayHeader?.url && (
           <div className="relative hidden md:block w-full max-w-[500px] aspect-[880/375] md:float-right md:ml-8 md:mb-4">
-            <div className="activity-stack group h-full">
-              <span className="activity-layer layer-one" aria-hidden />
-              <span className="activity-layer layer-two" aria-hidden />
+            <div
+              className={`activity-stack group h-full ${isShuffling ? 'shuffling' : ''} ${cycleImages.length > 0 ? 'cursor-pointer' : ''}`}
+              onClick={shuffleLayers}
+              role={cycleImages.length > 0 ? 'button' : undefined}
+              tabIndex={cycleImages.length > 0 ? 0 : undefined}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                  e.preventDefault();
+                  shuffleLayers();
+                }
+              }}
+            >
+      <span
+        className="activity-layer layer-one"
+        aria-hidden
+        style={{
+          ...buildLayerBackground(0, 'linear-gradient(135deg, #e0f2fe, #fef9c3)'),
+                  ...withBaseTransform('rotate(-2deg) translate(-8px, 10px)'),
+                  overflow: 'hidden',
+                  ['--shuffle-delay' as any]: '0ms',
+                } as React.CSSProperties}
+              >
+                {renderLayerImage(0)}
+              </span>
+              <span
+                className="activity-layer layer-two"
+                aria-hidden
+                style={{
+                  ...buildLayerBackground(1, 'linear-gradient(135deg, #ede9fe, #cffafe)'),
+                  ...withBaseTransform('rotate(3deg) translate(12px, -8px)'),
+                  overflow: 'hidden',
+                  ['--shuffle-delay' as any]: '60ms',
+                } as React.CSSProperties}
+              >
+                {renderLayerImage(1)}
+              </span>
               <span
                 aria-hidden
-                className="absolute inset-10 rounded-3xl"
+                className="activity-layer absolute inset-10 rounded-3xl"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(251,191,36,0.2), rgba(192,132,252,0.18))',
-                  transform: 'rotate(-6deg) translate(-18px, 16px)',
+                  ...buildLayerBackground(
+                    2,
+                    'linear-gradient(135deg, rgba(251,191,36,0.08), rgba(192,132,252,0.08))',
+                    'linear-gradient(135deg, rgba(251,191,36,0.2), rgba(192,132,252,0.18))'
+                  ),
+                  ...withBaseTransform('rotate(-6deg) translate(-18px, 16px)'),
                   boxShadow: '0 14px 34px rgba(0,0,0,0.12)',
-                }}
-              />
+                  zIndex: 2,
+                  overflow: 'hidden',
+                  ['--shuffle-delay' as any]: '120ms',
+                } as React.CSSProperties}
+              >
+                {renderLayerImage(2)}
+              </span>
               <span
                 aria-hidden
-                className="absolute inset-8 rounded-3xl"
+                className="activity-layer absolute inset-8 rounded-3xl"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(110,231,183,0.18), rgba(99,102,241,0.18))',
-                  transform: 'rotate(7deg) translate(18px, -12px)',
+                  ...buildLayerBackground(
+                    3,
+                    'linear-gradient(135deg, rgba(110,231,183,0.08), rgba(99,102,241,0.08))',
+                    'linear-gradient(135deg, rgba(110,231,183,0.18), rgba(99,102,241,0.18))'
+                  ),
+                  ...withBaseTransform('rotate(7deg) translate(18px, -12px)'),
                   boxShadow: '0 14px 34px rgba(0,0,0,0.10)',
-                }}
-              />
+                  zIndex: 3,
+                  overflow: 'hidden',
+                  ['--shuffle-delay' as any]: '180ms',
+                } as React.CSSProperties}
+              >
+                {renderLayerImage(3)}
+              </span>
               <span
                 aria-hidden
-                className="absolute inset-6 rounded-3xl"
+                className="activity-layer absolute inset-6 rounded-3xl"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(250,204,21,0.22), rgba(168,85,247,0.2))',
-                  transform: 'rotate(-3deg) translate(-8px, 10px)',
-                  boxShadow: '0 16px 36px rgba(0,0,0,0.12)',
-                }}
-              />
+                  ...buildLayerBackground(
+                    4,
+                    'linear-gradient(135deg, rgba(250,204,21,0.08), rgba(168,85,247,0.08))',
+                    'linear-gradient(135deg, rgba(250,204,21,0.14), rgba(168,85,247,0.14))'
+                  ),
+                  ...withBaseTransform('rotate(-3deg) translate(-8px, 10px)'),
+                  boxShadow: '0 8px 18px rgba(0,0,0,0.08)',
+                  zIndex: 1,
+                  overflow: 'hidden',
+                  ['--shuffle-delay' as any]: '240ms',
+                } as React.CSSProperties}
+              >
+                {renderLayerImage(4)}
+              </span>
               <span
                 aria-hidden
-                className="absolute inset-5 rounded-3xl"
+                className="activity-layer absolute inset-5 rounded-3xl"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(52,211,153,0.18), rgba(99,102,241,0.2))',
-                  transform: 'rotate(4deg) translate(12px, -6px)',
-                  boxShadow: '0 16px 36px rgba(0,0,0,0.1)',
-                }}
-              />
+                  ...buildLayerBackground(
+                    5,
+                    'linear-gradient(135deg, rgba(52,211,153,0.08), rgba(99,102,241,0.08))',
+                    'linear-gradient(135deg, rgba(52,211,153,0.14), rgba(99,102,241,0.14))'
+                  ),
+                  ...withBaseTransform('rotate(4deg) translate(12px, -6px)'),
+                  boxShadow: '0 8px 18px rgba(0,0,0,0.08)',
+                  zIndex: 1,
+                  overflow: 'hidden',
+                  ['--shuffle-delay' as any]: '300ms',
+                } as React.CSSProperties}
+              >
+                {renderLayerImage(5)}
+              </span>
               <div
                 className="absolute inset-0 rounded-3xl pointer-events-none transform -translate-x-2 -translate-y-2 transition-transform duration-300 ease-out group-hover:translate-x-3 group-hover:translate-y-3 z-30"
                 style={{
@@ -135,15 +295,19 @@ const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introS
               <div className="absolute inset-4 rounded-3xl bg-gradient-to-br from-orange-300/35 via-fuchsia-300/28 to-indigo-300/28 blur-3xl opacity-90 pointer-events-none" />
               <div className="activity-photo -rotate-2">
                 <div className="absolute inset-0">
-                  <Image
-                    src={headerImage.url}
-                    alt="Header portrait"
-                    fill
-                    className="object-cover"
-                    placeholder={headerImage.blurDataURL ? 'blur' : undefined}
-                    blurDataURL={headerImage.blurDataURL}
-                    sizes="(max-width: 768px) 90vw, 32vw"
-                  />
+                  {mainImage?.url && (
+                    <Image
+                      key={`main-${mainImage.url}-${layerFrame}`}
+                      src={mainImage.url}
+                      alt="Header portrait"
+                      fill
+                      className="object-cover"
+                      style={mainImage.objectPosition ? { objectPosition: mainImage.objectPosition } : undefined}
+                      placeholder={mainImage.blurDataURL ? 'blur' : undefined}
+                      blurDataURL={mainImage.blurDataURL}
+                      sizes="(max-width: 768px) 90vw, 32vw"
+                    />
+                  )}
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-300/20 via-fuchsia-300/16 to-indigo-300/16 pointer-events-none" />
               </div>
@@ -284,7 +448,11 @@ const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introS
                   alt={photo.title || 'Activity'}
                   className="object-cover"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  style={photo.imagePosition ? { objectPosition: photo.imagePosition } : undefined}
+                  style={
+                    photo.imagePosition || photo.objectPosition
+                      ? { objectPosition: photo.imagePosition || photo.objectPosition }
+                      : undefined
+                  }
                   placeholder={photo.blurDataURL ? 'blur' : undefined}
                   blurDataURL={photo.blurDataURL}
                 />
@@ -329,8 +497,14 @@ export async function getStaticProps() {
       bio,
       resume{asset->{url}},
       resume{asset->{url, _updatedAt}},
-      headerImage{
-        asset->{url, metadata{lqip}}
+      headerImages[]{
+        asset->{
+          _ref,
+          url,
+          metadata{lqip}
+        },
+        crop,
+        hotspot
       }
     }`
   );
@@ -344,9 +518,12 @@ export async function getStaticProps() {
         imagePosition,
         image{
           asset->{
+            _ref,
             url,
             metadata{lqip}
-          }
+          },
+          crop,
+          hotspot
         }
       }
     }`
@@ -354,13 +531,24 @@ export async function getStaticProps() {
 
   const activities = {
     title: activitiesDoc?.title,
-    photos: (activitiesDoc?.photos || []).map((p: any) => ({
-      title: p?.title,
-      caption: p?.caption,
-      imageUrl: p?.image?.asset?.url,
-      blurDataURL: p?.image?.asset?.metadata?.lqip,
-      imagePosition: p?.imagePosition,
-    })),
+    photos: (activitiesDoc?.photos || []).map((p: any) => {
+      const built = buildSanityImage(p?.image, { width: 1200, height: 900 });
+      const safeBuilt = built
+        ? {
+            ...built,
+            objectPosition: built.objectPosition ?? null,
+            blurDataURL: built.blurDataURL ?? null,
+          }
+        : null;
+      return {
+        title: p?.title,
+        caption: p?.caption,
+        imageUrl: safeBuilt?.url,
+        blurDataURL: safeBuilt?.blurDataURL,
+        imagePosition: p?.imagePosition,
+        objectPosition: safeBuilt?.objectPosition,
+      };
+    }),
   };
 
   return {
@@ -371,12 +559,18 @@ export async function getStaticProps() {
       bio: aboutSettings?.bio || null,
       resumeUrl: aboutSettings?.resume?.asset?.url || null,
       resumeUpdatedAt: aboutSettings?.resume?.asset?._updatedAt || null,
-      headerImage: aboutSettings?.headerImage?.asset
-        ? {
-            url: aboutSettings.headerImage.asset.url,
-            blurDataURL: aboutSettings.headerImage.asset.metadata?.lqip,
-          }
-        : null,
+      headerImages:
+        (aboutSettings?.headerImages || [])
+          .map((img: any) => {
+            const built = buildSanityImage(img, { width: 1600, height: 700 });
+            if (!built) return null;
+            return {
+              ...built,
+              objectPosition: built.objectPosition ?? null,
+              blurDataURL: built.blurDataURL ?? null,
+            };
+          })
+          .filter(Boolean),
       activities,
     },
     revalidate: 600,

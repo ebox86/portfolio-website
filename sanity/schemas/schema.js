@@ -11,6 +11,7 @@ import aboutSettings from './aboutSettings';
 import professionalExperience from './professionalExperience';
 import education from './education';
 import personalActivity from './personalActivity';
+import contactSettings from './contactSettings';
 
 export default [
   post,
@@ -26,4 +27,5 @@ export default [
   professionalExperience,
   education,
   personalActivity,
+  contactSettings,
 ];
