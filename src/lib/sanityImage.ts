@@ -13,6 +13,8 @@ export type BuiltImage = {
   url: string;
   blurDataURL?: string;
   objectPosition?: string;
+  width?: number;
+  height?: number;
 };
 
 export const buildSanityImage = (img: any, options?: BuildOptions): BuiltImage | null => {
@@ -29,6 +31,10 @@ export const buildSanityImage = (img: any, options?: BuildOptions): BuiltImage |
   const url = sized?.url() || img?.asset?.url;
   if (!url) return null;
 
+  const dims = img?.asset?.metadata?.dimensions;
+  const width = typeof dims?.width === 'number' ? dims.width : undefined;
+  const height = typeof dims?.height === 'number' ? dims.height : undefined;
+
   const hotspot = img?.hotspot;
   const objectPosition = hotspot
     ? `${(hotspot.x ?? 0.5) * 100}% ${(hotspot.y ?? 0.5) * 100}%`
@@ -38,5 +44,7 @@ export const buildSanityImage = (img: any, options?: BuildOptions): BuiltImage |
     url,
     blurDataURL: img?.asset?.metadata?.lqip || null,
     objectPosition,
+    width,
+    height,
   };
 };

@@ -259,21 +259,12 @@ const ProjectsPage: React.FC<ProjectsProps> = ({ categories = [], projects = [],
               {pagedProjects.map((project) => {
                 const catKey = projectCategoryKey(project) || '';
                 const cat = categoryMap[catKey];
-                const catLabel = cat?.label || 'Uncategorized';
                 const projectHref = project.slug ? `/projects/${encodeURIComponent(project.slug)}` : null;
                 const projectImage = buildSanityImage(project.image, { width: 400, height: 260 });
-                const gradientStart = cat?.gradientStart || defaultTone.start;
-                const gradientEnd = cat?.gradientEnd || defaultTone.end;
-                const cardStyle = cat
-                  ? {
-                      background: `linear-gradient(135deg, ${gradientStart}22, #ffffff)`,
-                    }
-                  : undefined;
 
                 const cardContent = (
                   <div
                     className="rounded-lg border border-gray-200 bg-white shadow-sm hover:shadow-md transition dark:border-gray-700 dark:bg-gray-800/80"
-                    style={cardStyle}
                   >
                     <div className="flex items-start gap-4 px-4 py-2.5">
                       <div className="flex flex-1 flex-col gap-1 min-w-0">
