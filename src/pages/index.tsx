@@ -165,15 +165,15 @@ const Home: React.FC<HomePageProps> = ({ initialData, hero }) => {
   return (
       <div className="w-full">
         <div>
-          <div className="pt-6 pb-2 w-full md:w-4/6 md:float-left relative text-center md:text-left">
-          <h1 className="text-5xl font-bold text-gray-800 dark:text-white mb-2">{heroTitle}</h1>
-          <p className="text-gray-700 dark:text-gray-200 py-1 text-xl">
+          <div className="pt-4 md:pt-2 pb-2 w-full md:w-4/6 md:float-left relative text-center md:text-left">
+          <h1 className="text-5xl font-bold text-gray-800 dark:text-white mb-3 md:mb-3">{heroTitle}</h1>
+          <p className="text-gray-700 dark:text-gray-200 text-xl mb-3 md:mb-4">
             {heroSubtitle}
           </p>
-          <p className="py-1">
+          <p className="mb-4 md:mb-5">
             💁🏻‍♂️ {pronouns}   📍 {location}
           </p>
-          <div className="flex flex-col md:flex-row md:items-center">
+          <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
             <button 
               onClick={() => router.push('/me')}
               className="py-2 px-4 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 m-2 md:text-left text-center inline-block transform transition duration-200 hover:-translate-y-1 hover:scale-105 hover:shadow-xl"
@@ -187,8 +187,8 @@ const Home: React.FC<HomePageProps> = ({ initialData, hero }) => {
               📞 Get in touch
             </button>
           </div>
-          <br />
-          <p className="text-gray-700 dark:text-gray-200">
+          <div className="mt-6 mb-5 w-full border-t border-gray-200 dark:border-gray-700" />
+          <p className="text-gray-700 dark:text-gray-200 mt-4">
             Here&apos;s a cat 👇
           </p>
         </div>

@@ -28,13 +28,16 @@ export default {
       description: 'Upload your latest resume to power the download button.',
     },
     {
-      name: 'headerImage',
-      title: 'Header Image',
-      type: 'image',
-      description: 'Portrait or photo used in the Me page header (clipped with the polygon mask).',
-      options: {
-        hotspot: true,
-      },
+      name: 'headerImages',
+      title: 'Header Image List',
+      type: 'array',
+      of: [
+        {
+          type: 'image',
+          options: { hotspot: true },
+        },
+      ],
+      description: 'Optional list of header images (first image is used by default).',
     },
   ],
 }

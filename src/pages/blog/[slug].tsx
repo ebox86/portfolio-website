@@ -2,12 +2,9 @@ import React from 'react';
 import { PortableText } from '@portabletext/react'; 
 import client from '../../../sanityClient';
 import Image from 'next/image';
-import imageUrlBuilder from '@sanity/image-url';
 import CodeComponent from '../../components/CodeComponent';
 import Link from 'next/link';
-
-
-const builder = imageUrlBuilder(client);
+import { buildSanityImage } from '../../lib/sanityImage';
 
 interface BlogPost {
   _id: string;
@@ -30,23 +27,19 @@ interface BlogPostPageProps {
   nextPost?: AdjacentPost | null;
 }
 
-function urlFor(source: any) {
-  return builder.image(source);
-}
-
 const ImageComponent = (value: any) => {
-  const imageUrl = urlFor(value.value).width(800).quality(80).url();
-  const blurUrl = urlFor(value.value).width(20).quality(20).url(); // Low-quality blurred image
+  const built = buildSanityImage(value.value, { width: 800 });
 
   return (
     <div className="w-full h-96 relative rounded-lg shadow-md mb-4 overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       <Image
-        src={imageUrl}
+        src={built?.url || ''}
         alt={value.alt || ' '}
         fill
-        placeholder="blur"
-        blurDataURL={blurUrl}
+        placeholder={built?.blurDataURL ? 'blur' : undefined}
+        blurDataURL={built?.blurDataURL}
         className='object-cover'
+        style={built?.objectPosition ? { objectPosition: built.objectPosition } : undefined}
         sizes="(max-width: 768px) 100vw, 33vw"
       />
     </div>
@@ -105,18 +98,20 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ initialData, prevPost, next
 
   const adjacentCard = (label: string, post: AdjacentPost | null | undefined) => {
     if (!post) return null;
+    const cover = buildSanityImage(post.mainImage, { width: 200, height: 160 });
     return (
       <Link
         href={`/blog/${encodeURIComponent(post.slug.current)}`}
         className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 bg-white shadow-sm transition hover:shadow-md dark:bg-gray-800 dark:border-gray-700"
       >
         <div className="relative w-20 h-16 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
-          {post.mainImage ? (
+          {cover ? (
             <Image
-              src={urlFor(post.mainImage).width(200).height(160).quality(70).url()}
+              src={cover.url}
               alt={post.title}
               fill
               className="object-cover"
+              style={cover.objectPosition ? { objectPosition: cover.objectPosition } : undefined}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600" />
@@ -177,8 +172,29 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
   const query = `
     *[_type == "post" && slug.current == $slug][0]{
       ...,
-      "prev": *[_type == "post" && publishedAt < ^.publishedAt] | order(publishedAt desc)[0]{title, slug, mainImage},
-      "next": *[_type == "post" && publishedAt > ^.publishedAt] | order(publishedAt asc)[0]{title, slug, mainImage}
+      mainImage{
+        asset->{_ref, url, metadata{lqip}},
+        crop,
+        hotspot
+      },
+      "prev": *[_type == "post" && publishedAt < ^.publishedAt] | order(publishedAt desc)[0]{
+        title,
+        slug,
+        mainImage{
+          asset->{_ref, url, metadata{lqip}},
+          crop,
+          hotspot
+        }
+      },
+      "next": *[_type == "post" && publishedAt > ^.publishedAt] | order(publishedAt asc)[0]{
+        title,
+        slug,
+        mainImage{
+          asset->{_ref, url, metadata{lqip}},
+          crop,
+          hotspot
+        }
+      }
     }
   `;
 
