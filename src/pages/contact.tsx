@@ -138,15 +138,12 @@ const ContactPage: React.FC<ContactPageProps> = ({ contactSubheading, contactLin
   };
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (feedbackMessage) {
-      timer = setTimeout(() => {
-        setFeedbackMessage('');
-        //setIsSuccess(null);
-      }, 20000);
-    }
+    if (!feedbackMessage || isSuccess) return;
+    const timer = setTimeout(() => {
+      setFeedbackMessage('');
+    }, 20000);
     return () => clearTimeout(timer);
-  }, [feedbackMessage]);
+  }, [feedbackMessage, isSuccess]);
 
   useEffect(() => {
     let cancelled = false;
@@ -331,7 +328,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ contactSubheading, contactLin
               name="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className={`mt-1 p-3 w-full border border-gray-200 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 ${
+              className={`mt-1 p-3 w-full border border-gray-200 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 dark:disabled:bg-gray-800 dark:disabled:border-gray-600 dark:disabled:text-gray-400 ${
                 flashTargets.name ? 'animate-flash-border ring-2 ring-red-500' : ''
               }`}
               placeholder="Your Name"
@@ -349,7 +346,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ contactSubheading, contactLin
               name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`mt-1 p-3 w-full border border-gray-200 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 ${
+              className={`mt-1 p-3 w-full border border-gray-200 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 dark:disabled:bg-gray-800 dark:disabled:border-gray-600 dark:disabled:text-gray-400 ${
                 flashTargets.email ? 'animate-flash-border ring-2 ring-red-500' : ''
               }`}
               placeholder="Your Email"
@@ -367,7 +364,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ contactSubheading, contactLin
               value={userMessage}
               onChange={(e) => setUserMessage(e.target.value)}
               rows={4}
-              className={`mt-1 p-3 w-full border border-gray-200 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 ${
+              className={`mt-1 p-3 w-full border border-gray-200 rounded-md focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 dark:disabled:bg-gray-800 dark:disabled:border-gray-600 dark:disabled:text-gray-400 ${
                 flashTargets.message ? 'animate-flash-border ring-2 ring-red-500' : ''
               }`}
               placeholder="Your Message"
@@ -429,16 +426,24 @@ const ContactPage: React.FC<ContactPageProps> = ({ contactSubheading, contactLin
               ${isSuccess === null ? '' : 'bg-opacity-50'}
               ${isSuccess ? 'bg-green-100 border-green-700 dark:bg-green-900/70 dark:border-green-400' : 'bg-red-100 border-red-700 dark:bg-red-900/70 dark:border-red-400'}
               border rounded-lg`}
-              style={{ zIndex: 2 }}
+              style={{ zIndex: 30 }}
             >
-              <button
-                className={`absolute top-0 right-0 transform -translate-x-1/2 -translate-y-1/2 ${isSuccess ? 'text-green-500 hover:text-green-700 border-green-700' : 'text-red-500 hover:text-red-700 border-red-700 dark:text-red-200 dark:border-red-300 dark:hover:text-red-100'} bg-white dark:bg-gray-800 border rounded-full p-0.5`}
-                onClick={() => setFeedbackMessage('')}
-              >
-                <RiCloseLine size={16} />
-              </button>
+              {!isSuccess && (
+                <button
+                  className={`absolute top-0 right-0 transform -translate-x-1/2 -translate-y-1/2 ${isSuccess ? 'text-green-500 hover:text-green-700 border-green-700' : 'text-red-500 hover:text-red-700 border-red-700 dark:text-red-200 dark:border-red-300 dark:hover:text-red-100'} bg-white dark:bg-gray-800 border rounded-full p-0.5`}
+                  onClick={() => setFeedbackMessage('')}
+                >
+                  <RiCloseLine size={16} />
+                </button>
+              )}
               <p className={`text-md ${isSuccess ? 'text-green-700 dark:text-green-200' : 'text-red-700 dark:text-red-200'}`}>{feedbackMessage}</p>
             </div>
+          )}
+          {isSuccess && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-2xl bg-gray-100/70 dark:bg-gray-900/60 z-10"
+            />
           )}
         </form>
       </div>
