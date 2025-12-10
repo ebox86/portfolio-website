@@ -169,21 +169,22 @@ const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introS
 
   return (
     <div className="w-full space-y-8">
-      <header className="relative space-y-4 after:content-[''] after:block after:clear-both pt-0 md:pt-0 -mt-4 md:-mt-4">
+      <header className="relative space-y-8 after:content-[''] after:block after:clear-both pt-0 md:pt-0 -mt-4 md:-mt-4">
         {displayHeader?.url && (
           <div className="relative hidden md:block w-full max-w-[500px] aspect-[880/375] md:float-right md:ml-8 md:mb-4">
-            <div
-              className={`activity-stack group h-full ${isShuffling ? 'shuffling' : ''} ${cycleImages.length > 0 ? 'cursor-pointer' : ''}`}
-              onClick={shuffleLayers}
-              role={cycleImages.length > 0 ? 'button' : undefined}
-              tabIndex={cycleImages.length > 0 ? 0 : undefined}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-                  e.preventDefault();
-                  shuffleLayers();
-                }
-              }}
-            >
+            <div className="h-full w-full p-4 sm:p-5">
+              <div
+                className={`activity-stack group h-full w-full ${isShuffling ? 'shuffling' : ''} ${cycleImages.length > 0 ? 'cursor-pointer' : ''}`}
+                onClick={shuffleLayers}
+                role={cycleImages.length > 0 ? 'button' : undefined}
+                tabIndex={cycleImages.length > 0 ? 0 : undefined}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+                    e.preventDefault();
+                    shuffleLayers();
+                  }
+                }}
+              >
       <span
         className="activity-layer layer-one"
         aria-hidden
@@ -313,8 +314,9 @@ const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introS
               </div>
             </div>
           </div>
+        </div>
         )}
-        <div className="space-y-3">
+        <div className="space-y-5 md:space-y-6">
           <h1 className="text-5xl font-bold text-gray-800 dark:text-white">Me</h1>
           <p className="text-lg text-gray-700 dark:text-gray-200">
             {introHeading || "I’m Evan 👨‍💻, a passionate infrastructure developer ⚙️ with over 12 years of experience in the tech industry 💼."}
@@ -327,7 +329,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introS
           )}
         </div>
       </header>
-      <h2 className="text-3xl font-semibold text-gray-800 dark:text-white">Professional Experience</h2>
+      <h2 className="mt-10 text-3xl font-semibold text-gray-800 dark:text-white">Professional Experience</h2>
       {/* Experience Timeline */}
       <div className="experience-timeline">
         {experiences.map((experience, index) => {
@@ -433,7 +435,7 @@ const AboutPage: React.FC<AboutPageProps> = ({ experiences, introHeading, introS
         </div>
       </div>
       {/* Personal Activities */}
-      <div className="space-y-6">
+      <div className="space-y-6 hidden md:block">
         <h2 className="text-3xl font-semibold text-gray-800 dark:text-white">Personal Activities</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {activityPhotos.slice(0, 2).map((photo, idx) => (
