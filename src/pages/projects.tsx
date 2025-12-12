@@ -118,7 +118,7 @@ const ProjectsPage: React.FC<ProjectsProps> = ({ categories = [], projects = [],
       <header className="space-y-3">
         <h1 className="text-5xl font-bold text-gray-800 dark:text-white">Projects</h1>
         <p className="text-lg text-gray-700 dark:text-gray-200">
-          Curated builds, infra work, and experiments.
+          Curated side projects, tools, and experiments.
         </p>
       </header>
 

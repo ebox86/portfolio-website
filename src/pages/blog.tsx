@@ -242,12 +242,6 @@ const BlogPage: React.FC<BlogPageProps> = ({ initialPage, tagsList = [], categor
               : 'All posts'}
           </h3>
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setActiveTags([])}
-              className="text-sm font-semibold px-3 py-1 rounded-full border border-gray-200 bg-white text-orange-600 hover:text-orange-700 hover:border-orange-200 hover:bg-gray-50 shadow-sm transition dark:border-gray-700 dark:bg-gray-800 dark:text-orange-300 dark:hover:text-orange-200 dark:hover:bg-gray-700"
-            >
-              Show all
-            </button>
             <div className="text-sm text-gray-600 dark:text-gray-300">
               {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}
             </div>
@@ -295,7 +289,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ initialPage, tagsList = [], categor
                               {tags.map(({ _id = '', title = '', slug }) => (
                                 <span
                                   key={_id || title}
-                                  className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full dark:bg-blue-700 dark:text-white"
+                                  className="text-xs font-medium rounded-full bg-gray-100 px-2.5 py-0.5 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
                                 >
                                   {title || slug}
                                 </span>

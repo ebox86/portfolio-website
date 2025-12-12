@@ -13,6 +13,7 @@ interface BlogPost {
   body: any;
   mainImage: any;
   publishedAt: string;
+  tags?: { _id: string; title?: string; slug?: { current: string } }[];
 }
 
 interface AdjacentPost {
@@ -130,6 +131,18 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ initialData, prevPost, next
       {initialData.mainImage && <ImageComponent value={initialData.mainImage} alt={initialData.title} />}
       <div className="mb-4">
         <h1 className="text-5xl font-semibold text-left text-gray-900 dark:text-white">{initialData.title}</h1>
+        {initialData.tags && initialData.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-3">
+            {initialData.tags.map((tag) => (
+              <span
+                key={tag._id}
+                className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+              >
+                {tag.title || tag.slug?.current || 'Tag'}
+              </span>
+            ))}
+          </div>
+        )}
         <p className="text-xs text-gray-500 dark:text-gray-400 pt-4">{new Date(initialData.publishedAt).toDateString()}</p>
       </div>
       <div className="bg-white border border-gray-300 dark:bg-gray-900 dark:border dark:border-gray-700 rounded-lg shadow-md p-4">
@@ -176,6 +189,11 @@ export async function getStaticProps({ params }: { params: { slug: string } }) {
         asset->{_ref, url, metadata{lqip}},
         crop,
         hotspot
+      },
+      tags[]->{
+        _id,
+        title,
+        "slug": slug.current
       },
       "prev": *[_type == "post" && publishedAt < ^.publishedAt] | order(publishedAt desc)[0]{
         title,
