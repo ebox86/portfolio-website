@@ -118,16 +118,6 @@ const ProjectPage: React.FC<{ project: ProjectDoc | null }> = ({ project }) => {
       </div>
 
       <div className="space-y-4">
-        {project.tags && project.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {project.tags.map((tag) => (
-              <span key={tag} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-200">
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
         <div className="grid gap-4 md:grid-cols-[minmax(0,1.7fr)_minmax(220px,300px)] md:items-start">
           <div className="min-w-0 space-y-3">
             <h1 className="text-5xl font-bold text-gray-900 dark:text-white">{project.title}</h1>
