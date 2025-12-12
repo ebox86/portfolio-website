@@ -34,11 +34,11 @@ const Avatar: React.FC<AvatarProps> = ({ src, blurDataURL }) => {
     <button
       type="button"
       onClick={handleClick}
-      className="relative inline-block group focus:outline-none transition-transform duration-500 ease-out hover:-translate-y-1 hover:scale-[1.02] active:scale-95"
+      className="relative inline-block group focus:outline-none"
       aria-label="Change avatar background"
     >
-      <span className="absolute inset-0 block scale-[1.12] rounded-full bg-gradient-to-br from-[#4158D0] via-[#C850C0] to-[#FFCC70] blur-2xl opacity-70 -z-10 transition-transform duration-500 group-hover:scale-[1.2]" />
-      <span className="relative block p-[6px] rounded-full bg-gradient-to-br from-[#4158D0] via-[#C850C0] to-[#FFCC70] transition-transform duration-500 group-hover:scale-105">
+      <span className="absolute inset-0 block scale-[1.12] rounded-full bg-gradient-to-br from-[#4158D0] via-[#C850C0] to-[#FFCC70] blur-2xl opacity-70 -z-10" />
+      <span className="relative block p-[6px] rounded-full bg-gradient-to-br from-[#4158D0] via-[#C850C0] to-[#FFCC70] transition-transform duration-500 ease-out group-hover:-translate-y-1 group-hover:scale-[1.02] active:scale-95">
         <span
           className="relative block w-48 h-48 rounded-full overflow-hidden shadow-xl bg-black transition-colors duration-500 ease-out"
           style={{ backgroundColor }}
