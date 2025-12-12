@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PortableText } from '@portabletext/react';
+import type { PortableTextBlock } from '@portabletext/types';
 import client from '../../../sanityClient';
 import { buildSanityImage } from '../../lib/sanityImage';
+import { addInlineCodeMarks } from '../../lib/portableTextUtils';
 
 type ProjectDoc = {
   _id: string;
   title: string;
   slug: string;
   summary?: string;
-  body?: any;
+  body?: PortableTextBlock[];
   status?: string;
   links?: {
     live?: string;
@@ -88,6 +90,12 @@ const portableComponents = {
 };
 
 const ProjectPage: React.FC<{ project: ProjectDoc | null }> = ({ project }) => {
+  const bodyWithInlineCode = useMemo<PortableTextBlock[] | undefined>(() => {
+    if (!project?.body) return undefined;
+    const result = addInlineCodeMarks(project.body);
+    return result ?? project.body;
+  }, [project?.body]);
+
   if (!project) {
     return <div className="p-6 text-center text-gray-700 dark:text-gray-200">Project not found.</div>;
   }
@@ -211,7 +219,7 @@ const ProjectPage: React.FC<{ project: ProjectDoc | null }> = ({ project }) => {
 
       {project.body ? (
         <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-          <PortableText value={project.body} components={portableComponents as any} />
+          <PortableText value={(bodyWithInlineCode ?? project.body) as PortableTextBlock[]} components={portableComponents as any} />
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed border-gray-200 bg-white p-5 text-gray-600 shadow-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">

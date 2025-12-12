@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { PortableText } from '@portabletext/react'; 
 import client from '../../../sanityClient';
 import Image from 'next/image';
 import CodeComponent from '../../components/CodeComponent';
 import Link from 'next/link';
 import { buildSanityImage } from '../../lib/sanityImage';
+import { addInlineCodeMarks } from '../../lib/portableTextUtils';
+import type { PortableTextBlock } from '@portabletext/types';
 
 interface BlogPost {
   _id: string;
   slug: any;
   title: string;
-  body: any;
+  body?: PortableTextBlock[];
   mainImage: any;
   publishedAt: string;
   tags?: { _id: string; title?: string; slug?: { current: string } }[];
@@ -59,14 +61,17 @@ const components = {
       </span>
     ),
     link: (props: any) => {
-      const target = (props.value?.href || '').startsWith('http') ? '_blank' : undefined
+      const target = (props.value?.href || '').startsWith('http') ? '_blank' : undefined;
       return (
-        <div className='pt-2'>
-          <Link href={props.value?.href} target={target} className='text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300'>
-            {props.children}
-          </Link>
-        </div>
-      )
+        <Link
+          href={props.value?.href}
+          target={target}
+          rel={target === '_blank' ? 'noreferrer' : undefined}
+          className="text-blue-500 underline decoration-2 underline-offset-2 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+        >
+          {props.children}
+        </Link>
+      );
     },
   },
   list: {
@@ -92,6 +97,12 @@ const components = {
 };
 
 const BlogPostPage: React.FC<BlogPostPageProps> = ({ initialData, prevPost, nextPost }) => {
+  const bodyWithInlineCode = useMemo<PortableTextBlock[] | undefined>(() => {
+    if (!initialData?.body) return undefined;
+    const result = addInlineCodeMarks(initialData.body);
+    return result ?? initialData.body;
+  }, [initialData?.body]);
+
   if (!initialData) {
     // Handle case where initialData is not available
     return <div>Error: Blog post not found!</div>;
@@ -146,9 +157,8 @@ const BlogPostPage: React.FC<BlogPostPageProps> = ({ initialData, prevPost, next
         <p className="text-xs text-gray-500 dark:text-gray-400 pt-4">{new Date(initialData.publishedAt).toDateString()}</p>
       </div>
       <div className="bg-white border border-gray-300 dark:bg-gray-900 dark:border dark:border-gray-700 rounded-lg shadow-md p-4">
-        {initialData.body ? 
-        (
-          <PortableText value={initialData.body} components={components} />
+        {initialData.body ? (
+          <PortableText value={(bodyWithInlineCode ?? initialData.body) as PortableTextBlock[]} components={components} />
         ) : (
           <p>No content available for this post.. i probably forgot to add a body.. <i>Opps</i></p>
         )}

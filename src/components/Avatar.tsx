@@ -20,7 +20,7 @@ const colorChoices = [
 ];
 
 const Avatar: React.FC<AvatarProps> = ({ src, blurDataURL }) => {
-  const [colorIndex, setColorIndex] = useState(0);
+  const [colorIndex, setColorIndex] = useState(1);
   const backgroundColor = useMemo(
     () => colorChoices[colorIndex % colorChoices.length],
     [colorIndex]
