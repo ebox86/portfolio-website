@@ -9,7 +9,7 @@ on:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
+    environment: prod
     steps:
       - name: Use Node.js 18
         uses: actions/setup-node@v2
@@ -34,6 +34,7 @@ jobs:
   deploy-cloud-run:
     needs: build-and-push
     runs-on: ubuntu-latest
+    environment: prod
     permissions:
       contents: read
       id-token: write
